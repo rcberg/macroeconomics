@@ -1,5 +1,5 @@
-# Macro- and Development Economics
-This repository was initiated to store materials for macroeconomics and development economics graduate coursework at the University of Oregon.
+# Macroeconomics
+This repository was initiated to store models and code for macroeconomic modeling, data, and analysis.
 
 ## Mosquito problem solution
 A worked-through answer to an old macroeconomics preliminary exam question: [Click here](https://raw.githack.com/rcberg/macroeconomics/master/reports/mosquito-problem/mosquito_macro_problem.html)
