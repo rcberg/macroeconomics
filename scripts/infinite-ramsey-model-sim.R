@@ -14,7 +14,7 @@
 a = 0.33
 b = 0.95
 p = 1-b
-g = 2
+g = 0.72
 d = 0.015
 n = 0.01
 TE = 500
@@ -192,6 +192,13 @@ lower_sp  |>
   ggplot(aes(x = time, y = consump) ) + 
   geom_line(linewidth = 1) + 
   labs(title = "Consumption", x = "Model time", y = "Output units") + 
+  theme_minimal()
+
+lower_sp  |> 
+  mutate( utility_cur = u_c(consump, g)) |> 
+  ggplot(aes(x = time, y = utility_cur) ) + 
+  geom_line(linewidth = 1) + 
+  labs(title = "Utility (current)", x = "Model time", y = "Utility units") + 
   theme_minimal()
 
 lower_sp  |> 
