@@ -1,26 +1,18 @@
-##############################
-#
-# a = capital share of output
-# b = discount rate
-# g = utility parameter
-# d = depreciation rate
-# n = population growth
-# N_0 = initial population
-# K_0 = initial capital
-# TE = final time period
-#
-##############################
-
-a = 0.33
-b = 0.95
-p = 1-b
-g = 0.72
-d = 0.015
-n = 0.01
-TE = 500
 
 # note: uses CRRA utility function of the form c^(1-g) /(1-g)
 # and a cobb-douglas production function of the (per-capita) form f^a
+
+##############################
+
+a = 0.33 # capital share of output
+b = 0.95 # legacy discount rate
+p = 1-b # discount rate
+g = 2 # crra utility parameter
+d = 0.015 # depreciation rate
+n = 0.01 # workforce/population growth rate
+TE = 500 # terminal time period. needs to be big enough for model to converge, small enough to run up to 5k iterations.
+
+##############################
 
 u_c = 
   function(c, g){

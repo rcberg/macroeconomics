@@ -1,25 +1,24 @@
+
 ############################### 
-# model parameters
-############################### 
-max_iter = 1000               # nr of model iterations
-a = 0.3                       # capital share of income
-b = 0.95                      # consumer intertemporal discount rate
-d = 0.05                      # depreciation over the generation cycle
-n = 0.01                      # population growth rate
-g = 0.03                      # technology/tfp growth rate
-z = n+g+n*g                   # (1+n)(1+g)
-l0 = 0.5                      # initial labor
-k0 = 0.5                      # initial capital
-tfp0=0.5                      # initial technology/tfp
+
+max_iter = 1000 # nr of model iterations
+a = 0.3 # capital share of income
+b = 0.95 # consumer intertemporal discount rate
+d = 0.05 # depreciation over the generation cycle
+n = 0.01 # population growth rate
+g = 0.03 # technology/tfp growth rate
+z = n+g+n*g # (1+n)(1+g)
+l0 = 0.5 # initial labor
+k0 = 0.5 # initial capital
+tfp0=0.5 # initial technology/tfp
+
 ###############################
 
-############################### 
 # labor and tfp paths
 
-l = l0*(1+n)^(0:max_iter)     # cool R trick a^(vecctor) is a vector
+l = l0*(1+n)^(0:max_iter)     # cool R trick a^(vector) is a vector
 tfp = tfp0*(1+g)^(0:max_iter)
 
-############################### 
 # steady state and golden rule capital levels
 # note production function is cobb-douglas crs in (K,L)
 
@@ -29,7 +28,6 @@ k_gr = (a/(z+d))^(1/(1-a))
 
 k = c(k0, rep(0,max_iter) )   # initialized capital vector
 
-############################### 
 # capital stock path based on equation of motion
 
 for(t in 1:max_iter){
@@ -37,15 +35,13 @@ for(t in 1:max_iter){
   k[(t+1)] = (k[t]^a)*(b*(1-a))/((1+b)*(1+z)) + k[t]*(1-d)/(1+z)
 }
 
-###############################
 # initialize tax sim
 
 k_tax = 
   c(k_ss, rep(0,max_iter) )
 
 # fun trick i discovered.
-# you can get this next result by assuming existence of a "k_gr" steady state with gov>0 and solving for gov.
-# convergence to a steady state requires the level of capital to converge to the golden rule level.
+# you can get this next result by assuming existence of a golden rule steady state level of k with gov>0, and solve for gov.
 
 gov = (1-a)*k_gr^a - k_gr*((1+b)*(z+d))/b
 

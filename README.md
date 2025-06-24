@@ -5,7 +5,9 @@ This repository was initiated to store models and code for macroeconomic modelin
 A worked-through answer to an old macroeconomics preliminary exam question: [Click here](https://raw.githack.com/rcberg/macroeconomics/master/reports/mosquito-problem/mosquito_macro_problem.html)
 
 ## Overlapping Generations (OLG) economy simulation
-Below is R code which produces simulations of a basic 2-period Overlapping Generations macroeconomic model. The model incorporates a lump-sum wage tax during the agent's working period, which is rebated to the agent as a public good. The tax is set to the level which causes the agent's savings to become consistent with dynamically-efficient capital accumulation.
+Below is R code which produces simulations of a basic 2-period Overlapping Generations macroeconomic model with simple logarithmic utility (CES with $\sigma$ = 1). I am working on extending the code to a more general CES utility function.
+
+The model incorporates a lump-sum wage tax during the agent's working period, which is rebated to the agent as a public good. The tax is set to the level which causes the agent's savings to become consistent with dynamically-efficient capital accumulation.
 
 Code: [Click here](https://github.com/rcberg/macroeconomics/blob/master/scripts/efficient-olg-simulation-with-taxes.R)
 
