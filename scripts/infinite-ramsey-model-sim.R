@@ -5,12 +5,11 @@
 ##############################
 
 a = 0.33 # capital share of output
-b = 0.95 # legacy discount rate
-p = 1-b # discount rate
-g = 2 # crra utility parameter
+p = 0.02 # discount rate
+g = 1 # crra utility parameter
 d = 0.015 # depreciation rate
 n = 0.01 # workforce/population growth rate
-TE = 500 # terminal time period. needs to be big enough for model to converge, small enough to run up to 5k iterations.
+TE = 300 # terminal time period. needs to be big enough for model to converge, small enough to run up to 5k iterations.
 
 ##############################
 
@@ -44,28 +43,32 @@ little_f_prime =
 
 k_next = 
   function(k,c, a, n, d){
+    
     k_next = k + little_f(k, a) - (n + d)*k - c 
     k_out = max(k_next,0)
+    
     return(k_out)
   }
 
 c_next = 
   function(k,c, a, n, d, g, p){
-    c_next = c + c*((n + d + little_f_prime(k,a) - p)/g)
+    
+    c_next = c + c*(little_f_prime(k,a) - p - d)/g
     c_out = max(c_next,0)
+    
     return(c_out)
   }
 
 stationary_k_curve = 
   function(k, a, n, d){
-    c = 
-      k^a - (n+d)*k
+    
+    c = k^a - (n+d)*k
     
     return(c)
   }
     
 k_ss = 
-  (a/(p-n-d))^(1/(1-a))
+  (a/(p + d))^(1/(1-a))
 
 c_ss = 
   k_ss^a - (n+d)*k_ss
@@ -96,15 +99,15 @@ shooter_function =
   }
 
 bisection_function = 
-  function( k0, tmax = TE, tol = 1e-4, max_iter = 5000, k_ter = k_ss, c_ter = c_ss
+  function( k0, tmax = TE, tol = 1e-4, max_iter = 2000, k_ter = k_ss, c_ter = c_ss
            ){
-    
-    # right now will only work for guesses in the lower stable region
     
     c0_upper = little_f(k0, a)
     
-    if( k0 > k_ter){
+    if( k0 > k_ter ){
+      
       c0_lower = stationary_k_curve(k0, a, n, d)
+    
     }else{
       c0_lower = 0
     }
@@ -147,8 +150,8 @@ bisection_function =
     return(out_tbl)
     }
 
-# heads up; convergence with this shooting algorithm is VERY sensitive to (n, d) choices!!
-# if you choose different (n, d) may not converge before the maximum iterations
+# heads up; convergence with this shooting algorithm is VERY sensitive to (n, d, p) choices!!
+# if you choose different (n, d, p) may not converge before the maximum iterations, and may actually diverge
 
 lower_sp = 
   bisection_function(0.2*k_ss)
