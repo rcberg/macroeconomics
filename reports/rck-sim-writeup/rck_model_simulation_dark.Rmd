@@ -1,0 +1,452 @@
+---
+title: "Ramsey-Cass-Koopmans Model Simulation"
+author: "Chris Berg"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: darkly
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(cache = TRUE, message = FALSE, warning = FALSE)
+
+library(tidyverse)
+library(ggdark)
+
+##############################
+
+a = 0.33 # capital share of output
+p = 0.02 # discount rate
+g = 1 # crra utility parameter
+d = 0.015 # depreciation rate
+n = 0.01 # workforce/population growth rate
+TE = 300 # terminal time period. needs to be big enough for model to converge, small enough to run up to 5k iterations.
+
+##############################
+
+u_c = 
+  function(c, g){
+    if( g == 1 ){
+      u = log(c)
+    }else{
+      u = (c^(1-g))/(1-g)
+    }
+    return(u)
+  }
+
+u_prime = 
+  function(c, g){
+    u_prime = c^(-g)
+    return(u_prime)
+  }
+
+little_f = 
+  function(k, a){
+    lil_f = k^a
+    return(lil_f)
+  }
+
+little_f_prime =
+  function(k, a){
+    lil_f_prime = a*k^(a-1)
+    return(lil_f_prime)
+  }
+
+k_next = 
+  function(k,c, a, n, d){
+    k_next = k + little_f(k, a) - (n + d)*k - c 
+    k_out = max(k_next,0)
+    return(k_out)
+  }
+
+c_next = 
+  function(k,c, a, n, d, g, p){
+    c_next = c + c*(little_f_prime(k,a) - d - p)/g
+    c_out = max(c_next,0)
+    return(c_out)
+  }
+
+stationary_k_curve = 
+  function(k, a, n, d){
+    c = 
+      k^a - (n+d)*k
+    
+    return(c)
+  }
+    
+k_ss = 
+  (a/(p+d))^(1/(1-a))
+
+c_ss = 
+  k_ss^a - (n+d)*k_ss
+
+
+```
+
+## Ramsey-Cass-Koopmans Model
+
+The Ramsey-Cass-Koopmans (RCK) model is a macroeconomic model that tries to describe how GDP, consumption, and factors of production change and evolve over time. Time will be indexed throughout this document with $t$.
+
+Similar to earlier growth models (like the Solow model), the RCK model takes as given that there is labor-- which grows at a given rate-- and one factor of production which is, itself, produced-- called "capital."  Unlike the Solow model, the RCK model does not simply assume decision-makers save at some constant rate. In the RCK model, well-being ("utility") is a function of consumption levels, and the decision-maker solves the problem of how much to consume today, versus how much to save for future consumption. This works by the decision-maker deciding to consume less today, and the savings are automatically invested in the form of additional capital. That capital increases future GDP, and therefore, the opportunity for future consumption-- and by extension, utility. The math behind this will be described soon.
+
+There are other features necessary to understand; for one, there are $H$ number of "households" who make their decisions as a decision-making unit, and all householders live to infinity. The size of the labor force grows exponentially at constant rate $n$ but we will assume the number of households does not change. The size of each household is therefore $\frac{L}{H}$. Because every household solves the exact same problem, they all make the same decision. This means we can set-up and solve the model for just one "representative agent" household. 
+
+It may also be the case that over time, the production process grows more-efficient at an exponential rate proportional to $g$. In this case, "efficiency" means being able to produce more GDP using the same level of inputs. Let's write-out the math and make this clear.
+
+### Production 
+
+At any time $t$, the factors of production $K_t , L_t$, are combined to produce GDP $Y_t$ according to the following "production function:"
+
+$$ Y_t = F(K_t,L_t) = K_t^a (A_t L_t)^{1-a} $$
+Here $A_t$ is that "efficiency" factor that enables the economy to produce more from a given levels of $K,L$. As mentioned before, the labor force size $L$ and efficiency $A$ both grow exponentially:
+
+
+\begin{align*}
+L_t & = L_0 e^{nt} \\ A_t & = A_0 e^{gt} \\ L_0 & > 0 \\ A_0 & > 0 \\ n & \geq 0 \\ g & \geq 0 
+\end{align*}
+
+Notice the size of the labor force has nothing to do with the wage-- labor supply is inelastic, growing at a constant rate. This is consistent with the maximization of a utility function $u(c,l) = c^b l^b$ subject to $T = l + L$ and $wL = pc$. The actual labor supply elasticity is [a controversial topic](https://www.nber.org/system/files/working_papers/w31549/w31549.pdf).
+
+It makes model-solving easier to re-write the production function in a way that gets rid of $A_t$ and $L_t$:
+
+$$ f(k_t) = \frac{K_t^a (A_t L_t)^{1-a}}{A_t L_t} = \left( \frac{K_t}{A_t L_t} \right)^{a} \equiv k_t^a$$
+Here the production function is expressed in terms of GDP per "effective" worker. Before describing capital, it is important to mention the RCK model features competitive factor markets-- factors of production are paid their "marginal product," i.e., the additional GDP resulting from an additional increment of the factor. The payment to capital is the real interest rate $r_t$. Using our per-effective-worker version of the production function, this means the real interest rate is:
+
+$$ r_t = f'(k_t) = ak_t^{a-1} $$
+
+Wages are formally defined as $\frac{\partial F(K,L)}{\partial L}$, but since this is the per-effective-worker form of the production function, we will use the trick that $f(k) = w + rk$, so 
+
+$$w_t = f(k_t) - f'(k_t)k_t = (1-a)k_t^a$$
+
+The only factor in the production function which we still have not specified is capital. The "capital equation of motion"-- or the capital accumulation equation-- describes how the economy's capital stock grows (or shrinks) based on  saving (or depreciation). 
+
+Using Newton's notation where $\dot{x} \equiv \dfrac{dx_t}{dt}$, it is:
+
+$$\dot{K} = Y_t - \delta K_t - C_t L_t$$
+
+Here $\delta$ is the depreciation rate of the durable capital asset, and $C_t = c_t A_t$ is personal consumption, meaning $C_tL_t$ is the total consumption of the economy. This equation then has a simple intuition: $Y - CL$ is the GDP of the economy *minus* all that gets consumed, so it is the total savings of the economy. $\delta K$ is how much capital is lost to deterioration or "wear and tear." So this equation says that the capital stock of the economy just goes up by the amount saved, minus what gets lost to deterioration.
+
+For the "effective worker," capital accumulation is:
+
+\begin{align*}
+
+\dot{k} = \dfrac{ d\left(\frac{K_t}{A_t L_t}\right)}{dt} & = \dot{K}(A_t L_t)^{-1} - K_t(\dot{A}L_t + A_t\dot{L})(A_tL_t)^{-2} \\ & = \dot{K}(A_t L_t)^{-1} - \left( \frac{K_t}{A_t L_t} \right)\left( \frac{\dot{A}L_t + A_t\dot{L}}{A_t L_t} \right)
+
+\end{align*}
+
+Simplifying this gives:
+
+$$ \dot{k} = \frac{ \dot{K_t}}{A_t L_t} - (n + g)k_t$$
+
+Now substituting the above capital accumulation equation $\dot{K}$ gives us the capital accumulation per effective worker:
+
+\begin{align*}
+
+\dot{k} & = \frac{ Y_t - \delta K_t - C_t}{A_t L_t} - (n + g)k_t \\ &= f(k_t) - \delta k_t - c_t - (n+g)k_t \\ & = f(k_t) - (n+g+\delta)k_t - c_t 
+
+\end{align*}
+
+This individual's version of the economy's capital equation of motion is an important part of the decision-maker's problem. The decision-maker does not just maximize their utility at one time-- they must decide how to maximize utility over their lifetime. The above equation constrains them: it determines how much additional capital they can gain, thus the additional consumption they can have in the future, by consuming less today. In other words, the above equation determines how the decision-maker can "trade" consumption between time periods. 
+
+Now let's close-off the model by looking at the consumption decision problem.
+
+### Consumer's problem
+
+The decision-makers in this model derive their well-being from consuming $c$, and they "live" to infinity, so they need to decide how much $c$ they should consume at every point in their (infinite) "lives." This might seem like a very difficult problem to solve, but it becomes easier when the correct methods are applied.
+
+Mathematically speaking, the decision-maker maximizes their total lifetime utility $U$ subject to their capital accumulation constraint.
+
+$$\max_{C} \ \ U = \int_{0}^{\infty} e^{-\rho t}u(C_t)\frac{L_t}{H} \ dt $$
+$$\text{s.t.} \ \ \dot{k} = f(k_t) - (n+g+d)k_t - c_t $$
+$$ k_t \ , \ c_t > 0 $$
+
+What is $\rho$? It is new to us. You might recognize the exponential term from the *present value* formula with infinite compounding periods: $PV = e^{-it}FV$. Only here, "value" is determined by utility and not money, like it is in financial present value problems. The value of utility from consuming amount $c_0$ before any time has passed is $e^{-\rho \cdot0}u(c_0) = u(c_0)$. At $t=0$ the present value of the same level of consumption, only promised in the future at time $t=T$ is $e^{-\rho T}u(c_0)$. It is clear that as $T$ is set further and further in the future, the decision-maker would value $c_0$ less and less compared to having it today. Looked-at this way, $\rho$ is a percentage version of how much the decision-maker *dislikes* having to wait for $c_0$. If $\rho = 0.01$, or 1\%, then the decision-maker only gets 99\% the utility waiting to consume $c_0$ tomorrow compared, to today, so larger $\rho$ obviously means the decision-maker is less-patient. We call $\rho$ the "discount rate."
+
+We will assume that the same-period utility function $u(C_t)$ has the following important properties: 
+
+\begin{align*}
+
+u'(C_t) & > 0 \\ u''(C_t) & < 0 \\ \lim_{C \to 0} \ u'(C_t) & = \infty
+
+\end{align*}
+
+Think, functions like $u(C_t) = \log(C_t)$ or $u(C_t) = \sqrt{C_t}$. Specifically, we will use:
+
+$$u(C_t) = \frac{C_t^{1-\theta}}{1-\theta}$$ 
+Note if $\theta = 0$ then $u(C) = C$ is a straight line with slope 1. If $\theta = \frac{1}{2}$ then $u(C) = 2\cdot \sqrt{C}$. So $\theta$ is just a number that determines the utility function curvature.
+
+Notice that $u'(C_t) = C_t^{-\theta}$ and so:
+
+\begin{align*}
+\lim_{\theta \to 1} \  u'(C_t) = \frac{1}{C_t} \ \implies \int u'(C_t) dC & = \int \frac{1}{C_t}dC \\[10pt] &= \log(C_t)
+\end{align*}
+
+Putting all this together, the household solves:
+
+\begin{align*} \max_C \ U & = \int_0^{\infty} e^{-\rho t} \frac{C_t^{1-\theta}}{1-\theta} \frac{L_t}{H} \ dt \\[12pt] &= \ \frac{1}{H} \int_0^{\infty} e^{-\rho t} \frac{(A_0e^{gt} \ c_t)^{1-\theta}}{1-\theta}(L_0e^{nt}) \ dt \\[12pt] & = \ \frac{A_0^{1-\theta}L_0}{H}\int_0^{\infty} e^{(n+(1-\theta)g-\rho)t}\frac{c_t^{1-\theta}}{1-\theta}dt 
+
+\end{align*}
+
+To simplify this expression, let $\beta = \rho - n - g(1-\theta)$. We will need to assume that $\beta > 0$. Further, let's make the very convenient assumption that $A_0^{1-\theta}L_0 = H$, which gives us the final form of the household's problem:
+
+$$ \max_c \ U = \int_0^{\infty}e^{-\beta t}\frac{c_t^{1-\theta}}{1-\theta}dt $$
+$$\text{s.t.} \ \ \dot{k} = f(k_t) - (n+g+d)k_t - c_t $$
+
+It turns out that the math behind solving these problems is more or less the same as the math behind a wide range of physics problems. It is too complex to fully explain here, but [Wikipedia has a very helpful and good article on it](https://web.archive.org/web/20250612134311/https://en.wikipedia.org/wiki/Hamiltonian_(control_theory)) for anyone interested. The cliff notes are that you need to set-up the problem as a "current value Hamiltonian," which looks like:
+
+$$\mathcal{H}(k,c,\lambda,t) = u(c_t) + \lambda_t( f(k_t) - (n+g+d)k_t - c_t ) $$
+
+Similar to before, I am not going to fully derive how we get the First-Order Conditions (FOCs) for these problems-- check out [the Wikipedia article](https://web.archive.org/web/20250612134311/https://en.wikipedia.org/wiki/Hamiltonian_(control_theory)) which explains that. Suffice to say, they are as follows:
+
+\begin{align*}
+
+\mathcal{H_c} = u'(c_t) - \lambda_t & = 0 \\
+\dot{\lambda} & = \beta\lambda_t - \mathcal{H_k} \\
+\lim_{t \to \infty} e^{-\beta t}\lambda_tk_t & = 0 
+\end{align*}
+
+The last one looks different than the others because it doesn't appear to involve any derivative of $\mathcal{H}$ in the expression. It's called the "Transversality Condition" (TVC) and it's there to ensure finite values for the solutions to $\lambda_t$ and $k_t$ over the (infinite) time horizon. Actually, if you work through the math, this TVC implies a sensible budget constraint that households must obey which just states that households can't borrow more than the present value of potential lifetime savings.
+
+Notice that the first FOC means $u'(c_t) = \lambda_t$, so we can derive an expression for $\dot{\lambda}$:
+
+\begin{align*}
+
+\dot{\lambda} = \dfrac{du'(c_t)}{dt} & = u''(c_t)\dot{c} \\ & = -\theta c_t^{-\theta - 1}\ \dot{c}
+
+\end{align*}
+
+Combining this with the first and second FOCs:
+
+\begin{align*}
+
+-\theta c_t^{-\theta - 1}\ \dot{c} & = \beta c_t^{-\theta} - c_t^{-\theta}(f'(k_t)-(n+g+\delta)) \\[10pt] & = c_t^{-\theta}(\rho - n - (1-\theta)g + n + g + \delta - f'(k_t))\\[10pt] & = c_t^{-\theta}(\rho + \theta g + \delta - f'(k_t))
+
+\end{align*}
+
+Solving for $\dot{c}$:
+
+$$ \frac{\dot{c}}{c_t} = \frac{f'(k_t) - \delta - \rho - \theta g }{\theta} $$
+
+This is a special equation, and has many names. often called the "Euler equation," sometimes the "Euler-Lagrange equation," or the "Keynes-Ramsey Rule." The Euler equation tells us how the decision-maker chooses to consume and save over time. Now we have expressions for how $c$ and $k$ change and evolve.
+
+\begin{align*} \dot{c} & = c_t\left(\frac{f'(k_t) - \delta - \rho - \theta g }{\theta}\right) \\ \dot{k} & = f(k_t) - (n+g+\delta)k_t - c_t
+
+\end{align*}
+
+### Euler equation intuition
+
+So we did a lot of math to get these equations, and the math seems to work. What is the actual, economic intuition behind these equations, though? What do they "mean?" First let's look at the Euler equation. To make the explanation simple, let's set $g = 0$ and $\theta = 1$. Also, let's substitute the real interest rate $r = f'(k)$ in to the equation. Then:
+
+$$ \frac{\dot{c}}{c_t} = (r_t - \delta) - \rho$$
+
+$r - \delta$ is the rate of return on capital, net of depreciation-- if capital has a 2\% return but degrades at 3\% over that time, the capital stock goes down by 1\%. From before, $\rho$ is the percentage rate that the consumer dislikes waiting to consume in the future. In other words, it is the "psychological" cost of saving. The net rate of return is the benefit to saving. Now it is clear, the Euler equation is a cost-benefit equation which says if the benefit of saving exceeds the cost and $r_t - \delta > \rho$ then the decision-maker will choose to save, and consume more in the future than they do today ($\dot{c} > 0$). In this specific, simplified case, if $(r_t - \delta) - \rho = 0.01$-- or the benefit of saving is 1\% greater than the cost-- the consumer will consume 1\% more in the future. This is the basic economic intuition behind the Euler equation.
+
+The intuition behind the capital accumulation per "effective" worker is the same. However, because we are looking at capital per *effective* worker $\frac{K}{AL}$, we need to account for how $AL$ grows, so we include $n + g$ in the equation. If this still seems unusual, assume momentarily that $A=1$ so that it is just capital per worker. If the capital stock goes up by 2\% but the population goes up by 3\%, then $k = \frac{K}{L}$  still goes down by 1\%.
+
+### The vector field
+
+Notice that we have not solved for $c_t$ or $k_t$ at all, we have just solved for is how $c$ and $k$ change over time. Even though there is no single equation that tells us what $c_t$ is, if we take a given $c_0$ and $k_0$, we can use $\dot{c}$ and $\dot{k}$ to solve for what $c_1$ and $k_1$ will be, and continue to repeat that process. We can actually calculate $\dot{c}$ and $\dot{k}$ for any values of $c$ and $k$ we have, so each point on a plot of $(k,c)$ could tell us the "direction" that $c$ and $k$ "move" in, and how much they move in that direction. This terminology might remind you of a *vector*. With our 2 equations, each point on $(k,c)$ gives us a *vector* "pointing" to where $c$ and $k$ will be in the near future.
+
+In other words, our Euler equation and capital equation of motion give us a "vector field,"^[ 
+You can check out what one of these vector fields looks like [here](https://web.archive.org/web/20250626102116/https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Phase_diagram_of_the_Ramsey_model.svg/960px-Phase_diagram_of_the_Ramsey_model.svg.png). ] and together with initial values $c_0,k_0$, determines the evolution over time of the entire economy: capital, consumption, and all the economic variables determined by them. Unfortunately, for a given initial value for $k_0$, almost all values of $c_0$ will send $c_t,k_t$ on trajectories that violate the TVC-- they either end up with zero consumption (hence $\lambda_t \rightarrow \infty$) or zero capital, and having large consumption with capital approaching zero intuitively violates an economy's resource constraint^[Formally, we should include a lifetime budget constraint or "No Ponzi Game" condition to the consumer's problem.].
+
+We do have a TVC and economic resource constraints, and when incorporating these into the model, there arises a "saddle path" solution to the problem. For any given initial value of $k_0$, for exactly one choice of $c_0$, the economy will converge to the steady state. The saddle path is the single time path of $c_t, k_t$ which converges to the steady state-- any other choice of $c_0$ and the vector field governed by $\dot{c}, \dot{k}$ causes the economy to "roll off the saddle" and towards the unstable path to one of the previously mentioned corner solutions, hence the "saddle path" name. You can see a [sketch of the saddle path (blue) and unstable path (red)](https://web.archive.org/web/20250609120403/https://upload.wikimedia.org/wikipedia/commons/4/48/Ramseypic.svg) without the vector field shown. 
+
+The saddle path needs to be solved numerically, and I have written a function which does just that; and we will take a look at it now. To understand how this function works, imagine you are on a bridge over a river with a pile of sticks next to you. Downstream in the river, there is a rock, and you need to throw the sticks in the river in such a way that the river carries the stick right up to the rock. You can imagine, it would be very tough to do on your first try. You have to pick a reasonable guess for where would be a good place to throw the stick, notice how the stick travels, and try to adjust your aim for next time. 
+
+That is basically how the "shooting algorithm" works: it takes $c_0$ and $k_0$ and works-through the path in the $c_t,k_t$ vector field. If it doesn't find the saddle path, the algorithm adjusts (based on where the economy "landed"), updates the guess for $c_0$, and takes another "shot." This repeats until (ideally) the saddle path is found and the model converges to the steady state.
+
+### Algorithms for solving the model
+
+Below is the code for the function which "shoots" (i.e., runs the model through time for a given $c_0,k_0$), and then a second function function which takes the results of the previous "shot" and updates the guess, hopefully converging on the correct saddle path at some point.
+
+```{r algorithms}
+
+
+shooting_function = 
+  function(c0, k0, tmax = TE){
+    
+    if( c0 > little_f(k0,a) ){stop("Consumption is infeasible.")}
+    
+    c_vec = rep(0, tmax )
+    k_vec = rep(0, tmax )
+    
+    c_vec[1] = c0
+    k_vec[1] = k0
+    
+    for(t in 2:tmax){
+      
+      
+      k_vec[t] = 
+        k_next( k_vec[(t-1)], c_vec[(t-1)], a, n, d)
+      
+      c_vec[t] = 
+        c_next( k_vec[(t-1)], c_vec[(t-1)], a, n, d, g, p)
+      
+    }
+    
+    return(list(k_vec,c_vec))
+  }
+
+bisection_function = 
+  function( k0, tmax = TE, tol = 1e-4, max_iter = 5000, k_ter = k_ss, c_ter = c_ss
+           ){
+    
+    # right now will only work for guesses in the lower stable region
+    
+    c0_upper = little_f(k0, a)
+    
+    if( k0 > k_ter){
+      c0_lower = stationary_k_curve(k0, a, n, d)
+    }else{
+      c0_lower = 0
+    }
+    
+    i=0
+    error_k = tol + 1
+    error_c = tol + 1
+    while(i < max_iter & (error_k > tol | error_c > tol) ){
+      
+      c0 = (c0_lower+c0_upper)/2
+      
+      k_vec = shooting_function(c0, k0)[[1]]
+      c_vec = shooting_function(c0, k0)[[2]]
+      
+      if(k_vec[tmax] > k_ter & c_vec[tmax] < c_ter){
+        c0_lower = c0 
+      }else if(k_vec[tmax] < k_ter & c_vec[tmax] < c_ter){
+        c0_upper = c0
+      }else if(k_vec[tmax] < k_ter & c_vec[tmax] > c_ter){
+        c0_upper = c0
+      }
+      
+      error_k = abs(k_vec[tmax] - k_ter)
+      error_c = abs(c_vec[tmax] - c_ter)
+      
+      i = i+1
+      
+      }
+      
+    out_tbl = 
+      data.frame(
+        capital = k_vec,
+        consump = c_vec,
+        time = 1:tmax,
+        iter = rep(i, TE),
+        error_cap = rep(error_k, TE),
+        error_cons = rep(error_c, TE)
+      )
+    
+    return(out_tbl)
+  }
+
+```
+
+### Saddle Path Convergence
+
+The red lines show the saddle path for this model. The blue vertical line is the level of capital where $\dot{c} = 0$, and the white curved line show the levels of $c_t,k_t$ where $\dot{k} = 0$. 
+
+```{r model_sim}
+# we should pick arbitrary, but reasonable, starting points:
+
+# to draw the full saddle path, we need one segment that starts "below" the steady state...
+lower_sp =  
+  bisection_function(0.2*k_ss)
+
+# ...and one that starts "above" the steady state
+upper_sp =  
+  bisection_function(2*k_ss)
+
+```
+
+```{r pressure, echo=FALSE}
+
+ggplot( ) + 
+  geom_line(
+    data = lower_sp |> 
+      bind_rows(
+        upper_sp
+      ),
+    aes(x = capital, y = consump),
+    linewidth=1,color='red') + 
+  geom_vline(xintercept = k_ss, linewidth = 1, color = 'blue') +
+  geom_line(data = 
+              tibble(
+                k = seq(0,(n+d)^(-(1/(1-a))),1),
+                c = stationary_k_curve(k,a,n,d)
+              ),
+            aes( x = k, y = c),
+            linewidth = 1
+            ) +
+  labs(title = paste0("Stationary path to steady state"), x = "Capital per worker", y = "Consumption per worker") + 
+  dark_theme_gray()+ 
+  theme(
+        plot.background = element_rect(fill = "grey10")
+        )
+```
+
+### Model variables over time
+
+Below we can see how the different variables of the model-- like consumption, the saving rate, the rate of return on capital, etc.-- evolve over time as the economy converges to the steady state.
+
+```{r variables, echo = F}
+lower_sp  |> 
+  ggplot(aes(x = time, y = consump) ) + 
+  geom_line(linewidth = 1) + 
+  labs(title = "Consumption", x = "Model time", y = "Output units") + 
+  dark_theme_gray()+ 
+  theme(
+        plot.background = element_rect(fill = "grey10")
+        )
+
+lower_sp  |> 
+  mutate( utility_cur = u_c(consump, g)) |> 
+  ggplot(aes(x = time, y = utility_cur) ) + 
+  geom_line(linewidth = 1) + 
+  labs(title = "Utility (current)", x = "Model time", y = "Utility units") + 
+  dark_theme_gray()+ 
+  theme(
+        plot.background = element_rect(fill = "grey10")
+        )
+
+lower_sp  |> 
+  ggplot(aes(x = time, y = capital) ) + 
+  geom_line(linewidth = 1) + 
+  labs(title = "Capital", x = "Model time", y = "Capital units") + 
+  dark_theme_gray()+ 
+  theme(
+        plot.background = element_rect(fill = "grey10")
+        )
+
+lower_sp  |> 
+  ggplot(aes(x = time, y = (little_f(capital,a)-consump)/little_f(capital,a) ) ) + 
+  geom_line(linewidth = 1) + 
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Savings rate", x = "Model time", y = "Percent of output") + 
+  dark_theme_gray()+ 
+  theme(
+        plot.background = element_rect(fill = "grey10")
+        )
+
+lower_sp  |> 
+  ggplot(aes(x = time, y = u_prime(consump,g)) ) + 
+  geom_line(linewidth = 1) + 
+  labs(title = "Lagrange Multiplier", x = "Model time", y = "Utility units") + 
+  dark_theme_gray() + 
+  theme(
+        plot.background = element_rect(fill = "grey10")
+        )
+
+lower_sp |> 
+  ggplot(aes(x = time, y = little_f_prime(capital,a)) ) + 
+  geom_line(linewidth = 1) + 
+  labs(title = "Rate of return", x = "Model time", y = "Output units") + 
+  dark_theme_gray()+ 
+  theme(
+        plot.background = element_rect(fill = "grey10")
+        )
+
+```
+
