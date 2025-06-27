@@ -15,3 +15,7 @@ Code: [Click here](https://github.com/rcberg/macroeconomics/blob/master/scripts/
 Below is R code which produces simulations of a basic Ramsey-Cass-Koopmans macroeconomic model. The model features a growing representative dynasty that lives to infinity, and plans as a single decision-maker. The code features a shooting algorithm that numerically solves for the dynamic saddle path to the steady state. (This algorithm is fairly sensitive to model parameters.)
 
 Code: [Click here](https://github.com/rcberg/macroeconomics/blob/master/scripts/infinite-ramsey-model-sim.R)
+
+For a walk-through of the Ramsey-Cass-Koopmans model that's oriented towards people with a decent mathematical background, but who might be less-familiar with macroeconomic models, make sure to check out my write-up below.
+
+Write-up: [(Light mode](https://raw.githack.com/rcberg/macroeconomics/refs/heads/main/reports/rck-sim-writeup/rck_model_simulation.html)[| Dark mode)](https://raw.githack.com/rcberg/macroeconomics/refs/heads/main/reports/rck-sim-writeup/rck_model_simulation_dark.html)
