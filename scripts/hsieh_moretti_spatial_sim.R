@@ -31,13 +31,13 @@ brain_hubs =
 
 
 msa_list <- 
-  read_csv("data/export/hsieh_moretti_msa_labels.csv") %>%
+  read_csv("data/raw/hm_replication_files/hsieh_moretti_msa_labels.csv") %>%
   select( msa ) %>% 
   unlist() %>%
   as.numeric()
 
 base_data = 
-  haven::read_dta("data/raw/data3.dta")
+  haven::read_dta("data/raw/hm_replication_files/data3.dta")
 
 hm_elasticity_experiment_own <- 
   function(
@@ -54,7 +54,7 @@ hm_elasticity_experiment_own <-
     theta_param <- theta
     
     treated_msa_names <- 
-      read_csv("data/export/hsieh_moretti_msa_labels.csv") %>%
+      read_csv("data/raw/hm_replication_files/hsieh_moretti_msa_labels.csv") %>%
       filter( msa %in% treatmsas ) %>%
       select( msa_name ) %>% 
       paste( collapse = ", ")
@@ -233,7 +233,7 @@ hm_elasticity_experiment_nat <-
     theta_param <- theta
     
     treated_msa_names <- 
-      read_csv("data/export/hsieh_moretti_msa_labels.csv") %>%
+      read_csv("data/raw/hm_replication_files/hsieh_moretti_msa_labels.csv") %>%
       filter( msa %in% treatmsas ) %>%
       select( msa_name ) %>% 
       paste( collapse = ", ")
