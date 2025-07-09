@@ -12,6 +12,170 @@ params =
     0.52 # tax parameter
   )
 
+brain_hubs = 
+  c(
+    5600,
+    7400,
+    7360
+  )
+
+rust_belts = 
+  c(
+    2640, 
+    7610, 
+    5280, 
+    4800, 
+    9320, 
+    1320, 
+    4040, 
+    6960, 
+    6840, 
+    3680, 
+    3200, 
+    1280, 
+    4320, 
+    8680, 
+    2360, 
+    960, 
+    2000, 
+    8400, 
+    870, 
+    80, 
+    7040, 
+    8160, 
+    3720, 
+    8320, 
+    3000, 
+    9140, 
+    3920, 
+    1680, 
+    2040, 
+    2160, 
+    6280, 
+    280, 
+    3740, 
+    7800, 
+    1280, 
+    3620, 
+    6880, 
+    2760, 
+    8160
+  )
+
+
+south_msas = 
+  c(
+    40,
+    120,
+    220,
+    320,
+    450,
+    50,
+    520,
+    600,
+    640,
+    720,
+    760,
+    840,
+    920,
+    1000,
+    1240,
+    1440,
+    1520,
+    1540,
+    1560,
+    1760,
+    1800,
+    1880,
+    1920,
+    1950, 
+    2020,
+    2320,
+    2560,
+    2580,
+    2680,
+    2700,
+    2750,
+    2880,
+    2900,
+    2920,
+    3120,
+    3160, 
+    3180, 
+    3290, 
+    3360, 
+    3440, 
+    3560, 
+    3600, 
+    3660, 
+    3810, 
+    3840, 
+    3880, 
+    3960, 
+    3980, 
+    4280, 
+    4400,
+    4420,
+    4600,
+    4640,
+    4680,
+    4880,
+    4900,
+    4920,
+    5160,
+    5200,
+    5240,
+    5360, 
+    5560, 
+    5720, 
+    5790, 
+    5800, 
+    5880, 
+    5960, 
+    6080, 
+    6640, 
+    6760, 
+    6800, 
+    7240, 
+    7510, 
+    7520, 
+    7680,
+    8240,
+    8280,
+    8560,
+    8600,
+    8640,
+    8800,
+    8840,
+    8960,
+    9080,
+    9160,
+    9200
+  )
+
+oth_large_msas = 
+  c(
+    1123, 
+    1600, 
+    1640, 
+    1840, 
+    2080, 
+    3480, 
+    3760, 
+    4120, 
+    4480, 
+    5080, 
+    5120, 
+    6160, 
+    6200, 
+    6440, 
+    6780, 
+    6920, 
+    7160, 
+    7320, 
+    7600
+  )
+
 westcoast_hubs <- 
   c(1600,
     1920,
@@ -21,14 +185,6 @@ westcoast_hubs <-
     7360,
     7400
   )
-
-brain_hubs = 
-  c(
-    5600,
-    7400,
-    7360
-  )
-
 
 msa_list <- 
   read_csv("data/raw/hm_replication_files/hsieh_moretti_msa_labels.csv") %>%
@@ -41,8 +197,12 @@ base_data =
 
 hm_elasticity_experiment_own <- 
   function(
-    theta, dataf, parameters, treatmsas
+    theta, dataf, parameters, treatmsas, experiment = "brains", label = T
   ){
+    
+    if( !(experiment %in% c("brains", "others")) ){
+      stop("please select 'brains' or 'others'.")
+    }
     
     
     alpha_param <- parameters[1]
@@ -110,7 +270,6 @@ hm_elasticity_experiment_own <-
               HP09 ) %>%
       merge( hsieh_moretti_states ) %>%
       mutate( 
-        south = ifelse( division %in% c(5, 6, 7), 1, 0),
         treat = ifelse( msa %in% treatmsas, 1, 0),
         wage1964 = exp(logwage_condit64),
         wage2009 = exp(logwage_condit09),
@@ -154,10 +313,13 @@ hm_elasticity_experiment_own <-
         c2 = land_param / ( beta_param*inverse + 1-alpha_param -eta_param - beta_param*inverse*eta_param +theta_param - eta_param*theta_param),
         d3 = mean(inverse) - mean(-5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*WRLURI),
         mean_WRI = median(WRLURI),
-        south_WR = weighted.mean(WRLURI, w = south),
-        new_inver =  ifelse( treat == 1,
-                             d3 -5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*((mean_WRI)),
-                             inverse),
+        brain_WRI = mean(WRLURI[msa %in% c( 5600, 7400, 7360 )]),
+        new_inver = 
+          case_when(
+          treat == 1 & experiment == "brains" ~ d3 -5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*((mean_WRI)),
+          treat == 1 & experiment == "others" ~ d3 -5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*((brain_WRI)),
+          treat == 0 ~ inverse
+        ),
         h1 = ( beta_param*new_inver + theta_param) / ( beta_param*new_inver + 1-alpha_param -eta_param - beta_param*new_inver*eta_param +theta_param - eta_param*theta_param),
         h2 = ( 1-alpha_param -eta_param)  / ( beta_param*new_inver + 1-alpha_param -eta_param - beta_param*new_inver*eta_param +theta_param - eta_param*theta_param),
         diff1 = (h1 - c1),
@@ -190,9 +352,6 @@ hm_elasticity_experiment_own <-
     out.list = 
       hsieh_moretti_data |> 
       filter( msa %in% treatmsas ) |> 
-      mutate( 
-        model = ifelse( theta_param> 0, "Imperfect Mobility","Perfect Mobility" )
-      ) |> 
       select(
         -c(
           tmp64, 
@@ -205,7 +364,6 @@ hm_elasticity_experiment_own <-
           Pbar64c, 
           Pbar09, 
           mean_WRI, 
-          south_WR, 
           hh64a, 
           hh09, 
           hh09a, 
@@ -215,14 +373,25 @@ hm_elasticity_experiment_own <-
         )
       )
     
+    if(label == T){
+       out.list = 
+         out.list |> 
+         mutate( 
+           model = ifelse( theta_param> 0, "Imperfect Mobility","Perfect Mobility" )
+         )
+    }
+    
     return(out.list)
   }
 
 hm_elasticity_experiment_nat <- 
   function(
-    theta, dataf, parameters, treatmsas
+    theta, dataf, parameters, treatmsas, experiment = "brains", label = T
   ){
     
+    if( !(experiment %in% c("brains", "others")) ){
+      stop("please select 'brains' or 'others'.")
+    }
     
     alpha_param <- parameters[1]
     eta_param <- parameters[2]
@@ -289,7 +458,6 @@ hm_elasticity_experiment_nat <-
               HP09 ) %>%
       merge( hsieh_moretti_states ) %>%
       mutate( 
-        south = ifelse( division %in% c(5, 6, 7), 1, 0),
         treat = ifelse( msa %in% treatmsas, 1, 0),
         wage1964 = exp(logwage_condit64),
         wage2009 = exp(logwage_condit09),
@@ -333,10 +501,13 @@ hm_elasticity_experiment_nat <-
         c2 = land_param / ( beta_param*inverse + 1-alpha_param -eta_param - beta_param*inverse*eta_param +theta_param - eta_param*theta_param),
         d3 = mean(inverse) - mean(-5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*WRLURI),
         mean_WRI = median(WRLURI),
-        south_WR = weighted.mean(WRLURI, w = south),
-        new_inver =  ifelse( treat == 1,
-                             d3 -5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*((mean_WRI)),
-                             inverse),
+        brain_WRI = mean(WRLURI[msa %in% c( 5600, 7400, 7360 )]),
+        new_inver = 
+          case_when(
+            treat == 1 & experiment == "brains" ~ d3 -5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*((mean_WRI)),
+            treat == 1 & experiment == "others" ~ d3 -5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*((brain_WRI)),
+            treat == 0 ~ inverse
+          ),
         h1 = ( beta_param*new_inver + theta_param) / ( beta_param*new_inver + 1-alpha_param -eta_param - beta_param*new_inver*eta_param +theta_param - eta_param*theta_param),
         h2 = ( 1-alpha_param -eta_param)  / ( beta_param*new_inver + 1-alpha_param -eta_param - beta_param*new_inver*eta_param +theta_param - eta_param*theta_param),
         diff1 = (h1 - c1),
@@ -364,18 +535,23 @@ hm_elasticity_experiment_nat <-
         Pbar64  = Pbar64/1000000,
         diff09_welf_adj=( (yy09/(Pbar64c) ) - (y64/(Pbar64) ) ) /  ( (y09/(Pbar09) ) - (y64/(Pbar64) ) ) -1
       ) %>%
-      summarise(output_64 = mean(y64),
-                output_act_09 = mean(y09),
-                output_cf_09 = mean(yy09),
-                change_in = treated_msa_names,
+      summarise(
                 policy_effect = 100*mean(diff09),
-                welfare_effect  = 100*mean(diff09_welf_adj),
-                mean_wage = weighted.mean(wage2009, w = emp2009),
-                mean_cf_wage = weighted.mean(x, w = new_emp09c)) %>%
-      mutate( model = ifelse( theta_param> 0, "Imperfect Mobility","Perfect Mobility" ))
+                welfare_effect  = 100*mean(diff09_welf_adj)
+                )
     
-    out.list = 
-      out_data_hsieh_moretti
+    if(label == T){
+      out.list = 
+        out_data_hsieh_moretti |> 
+        mutate( 
+          model = ifelse( theta_param> 0, "Imperfect Mobility","Perfect Mobility" )
+        )
+    }else{
+      
+      out.list = 
+        out_data_hsieh_moretti
+    }
+    
     
     return(out.list)
   }
@@ -422,11 +598,6 @@ westcoast_experiment_nat <-
   ) |> 
   bind_rows()
 
-bind_rows(
-  westcoast_experiment[[1]][[2]],
-  westcoast_experiment[[2]][[2]]
-)
-
 pdx_experiment_own = 
   map(
     c(0,0.3),
@@ -466,3 +637,94 @@ pnw_experiment_nat =
     treatmsas = c(6440, 7600)
   ) |> 
   bind_rows()
+
+hsieh_tbl_4 = 
+  bind_rows(
+    map(
+      0,
+      hm_elasticity_experiment_nat,
+      dataf = base_data, 
+      parameters = params , 
+      treatmsas = brain_hubs,
+      experiment = "brains",
+      label = F
+    )[[1]] |> 
+      mutate( change_in = "New York, San Fransisco, San Jose"),
+    map(
+      0,
+      hm_elasticity_experiment_nat,
+      dataf = base_data, 
+      parameters = params , 
+      treatmsas = rust_belts,
+      experiment = "others",
+      label = F
+    )[[1]] |> 
+      mutate( change_in = "Rust Belt"),
+    map(
+      0,
+      hm_elasticity_experiment_nat,
+      dataf = base_data, 
+      parameters = params , 
+      treatmsas = south_msas,
+      experiment = "others",
+      label = F
+    )[[1]] |> 
+      mutate( change_in = "South"),
+    map(
+      0,
+      hm_elasticity_experiment_nat,
+      dataf = base_data, 
+      parameters = params , 
+      treatmsas = oth_large_msas,
+      experiment = "others",
+      label = F
+    )[[1]] |> 
+      mutate( change_in = "Other large cities")
+  )
+
+hsieh_tbl_5 = 
+  bind_rows(
+    map(
+      0.3,
+      hm_elasticity_experiment_nat,
+      dataf = base_data, 
+      parameters = params , 
+      treatmsas = brain_hubs,
+      experiment = "brains",
+      label = F
+    )[[1]] |> 
+      mutate( change_in = "New York, San Fransisco, San Jose"),
+    map(
+      0.3,
+      hm_elasticity_experiment_nat,
+      dataf = base_data, 
+      parameters = params , 
+      treatmsas = rust_belts,
+      experiment = "others",
+      label = F
+    )[[1]] |> 
+      mutate( change_in = "Rust Belt"),
+    map(
+      0.3,
+      hm_elasticity_experiment_nat,
+      dataf = base_data, 
+      parameters = params , 
+      treatmsas = south_msas,
+      experiment = "others",
+      label = F
+    )[[1]] |> 
+      mutate( change_in = "South"),
+    map(
+      0.3,
+      hm_elasticity_experiment_nat,
+      dataf = base_data, 
+      parameters = params , 
+      treatmsas = oth_large_msas,
+      experiment = "others",
+      label = F
+    )[[1]] |>
+      mutate( change_in = "Other large cities")
+  )
+
+hsieh_tbl_4 |> View()
+hsieh_tbl_5 |> View()
