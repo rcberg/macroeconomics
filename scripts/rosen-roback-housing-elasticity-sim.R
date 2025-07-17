@@ -133,7 +133,15 @@ ggplot() +
               color = '#00BFC4') + 
   theme_minimal()
 
-treated_cbsas = c(41940,41860,37100,41740,31080,42660,38900)
+treated_cbsas = 
+  c( 41940, 
+     41860, 
+     37100, 
+     41740, 
+     31080, 
+     42660, 
+     38900 )
+
 median_wrluri = median(city_msa_df$log_wrl)
 treated_city = city_msa_df$city[ city_msa_df$cbsa_fips %in% treated_cbsas ]
 a_policy = city_msa_df$saiz_inv_elasticity
@@ -198,3 +206,6 @@ policy_comparison =
           policy_city = if_else( city %in% treated_city, 1, 0) ,
           policy_diff_output_total = sum(policy_diff_output)
   )
+
+# treated cities/msas
+city_msa_df[city_msa_df$cbsa_fips %in% treated_cbsas, c('cbsa_fips','cbsa_name') ]
