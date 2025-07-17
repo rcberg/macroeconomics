@@ -4,7 +4,7 @@ pacman::p_load(
 )
 
 msa_elasticity_df = 
-  read_csv("data/export/msa_2022_urban_economy.csv") |> 
+  read_csv("data/raw/rosen_roback_sim_2022data.csv") |> 
   select( msafips, saiz_elasticity, saiz_inv_elasticity, unaval, log_pop_1990, log_wrl ) |> 
   filter( !is.na(saiz_inv_elasticity)) |> 
   rename( 'cbsa_fips' = 'msafips')
