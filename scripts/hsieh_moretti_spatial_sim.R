@@ -7,8 +7,7 @@ params =
   c(0.65, # alpha
     0.25, # eta 
     0.4, # beta
-    0.05, # rate R
-    0.52 # tax parameter
+    0.05 # rate R
   )
 
 brain_hubs = 
@@ -210,7 +209,6 @@ hm_elasticity_experiment <-
     eta_param <- parameters[2]
     beta_param <- parameters[3]
     rate <- parameters[4]
-    tax_param <- parameters[5]
     land_param = 1 - alpha_param - eta_param
     theta_param <- theta
     
