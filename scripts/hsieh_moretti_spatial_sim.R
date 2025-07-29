@@ -8,7 +8,6 @@ params =
     0.25, # eta 
     0.4, # beta
     0.05, # rate R
-    1-0.65-0.25, # land exponent
     0.52 # tax parameter
   )
 
@@ -211,8 +210,8 @@ hm_elasticity_experiment <-
     eta_param <- parameters[2]
     beta_param <- parameters[3]
     rate <- parameters[4]
-    land_param <- parameters[5]
-    tax_param <- parameters[6]
+    tax_param <- parameters[5]
+    land_param = 1 - alpha_param - eta_param
     theta_param <- theta
     
     treated_msa_names <- 
@@ -233,9 +232,7 @@ hm_elasticity_experiment <-
               emp1964, 
               emp2009, 
               wage1964, 
-              wage2009, 
-              logwage64, 
-              logwage09, 
+              wage2009,  
               logwage_condit64, 
               logwage_condit09, 
               HP64, 
@@ -251,8 +248,6 @@ hm_elasticity_experiment <-
         treat = ifelse( msa %in% treatmsas, 1, 0),
         wage_condit_1964 = exp(logwage_condit64),
         wage_condit_2009  = (exp(logwage_condit09)/weighted.mean(exp(logwage_condit09), w = emp2009))*weighted.mean(wage_condit_1964, w = emp1964),
-        logwage64 = log(wage_condit_1964),
-        logwage09 = log(wage_condit_2009),
         WRLURI = ifelse( is.na(WRLURI) == T, st_avg_wr,WRLURI ),
         unaval = ifelse( is.na(unaval) == T, st_avg_unaval,unaval),
         populat_saiz = ifelse( is.na(populat_saiz) == T, st_avg_pop, populat_saiz ),
@@ -267,10 +262,10 @@ hm_elasticity_experiment <-
         amenity_im_09 = mean(wage_condit_2009)*(1 + (.33 * ( (HP09 - mean(HP09))/mean(HP09) )) - (.51 * ( (wage_condit_2009 - mean(wage_condit_2009))/mean(wage_condit_2009) )) + ( theta_param*((emp2009-mean(emp2009))/mean(emp1964)) ) ),
         emp_share_64 = (emp1964 / sum(emp1964)),
         emp_share_09 = (emp2009 / sum(emp2009)),
-        Pbar64 = sum(emp_share_64*wage_condit_1964),
-        Pbar09 = sum(emp_share_09*wage_condit_2009),
-        tfp_exponent = ( beta_param*inverse + theta_param)     / ( beta_param*inverse + 1-alpha_param -eta_param - beta_param*inverse*eta_param +theta_param - eta_param*theta_param),
-        amenity_exponent = land_param / ( beta_param*inverse + 1-alpha_param -eta_param - beta_param*inverse*eta_param +theta_param - eta_param*theta_param),
+        price_avg_ratio_64 = sum(emp_share_64*wage_condit_1964),
+        price_avg_ratio_09 = sum(emp_share_09*wage_condit_2009),
+        tfp_exponent = ( beta_param*inverse + theta_param) / ( land_param + (beta_param*inverse + theta_param)*(1 - eta_param)),
+        amenity_exponent = land_param / ( land_param + (beta_param*inverse + theta_param)*(1 - eta_param)),
         invelasticity_intercept = mean(inverse) - mean(-5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*WRLURI),
         mean_WRI = median(WRLURI),
         brain_WRI = mean(WRLURI[msa %in% c( 5600, 7400, 7360 )]),
@@ -280,32 +275,32 @@ hm_elasticity_experiment <-
           treat == 1 & experiment == "others" ~ invelasticity_intercept -5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*((brain_WRI)),
           treat == 0 ~ inverse
         ),
-        tfp_exponent_policy = ( beta_param*new_inver + theta_param) / ( beta_param*new_inver + 1-alpha_param -eta_param - beta_param*new_inver*eta_param +theta_param - eta_param*theta_param),
-        amenity_exponent_policy = ( 1-alpha_param -eta_param)  / ( beta_param*new_inver + 1-alpha_param -eta_param - beta_param*new_inver*eta_param +theta_param - eta_param*theta_param),
+        tfp_exponent_policy = ( beta_param*new_inver + theta_param) / ( land_param + (beta_param*new_inver + theta_param)*(1 - eta_param) ),
+        amenity_exponent_policy = land_param / ( land_param + (beta_param*new_inver + theta_param)*(1 - eta_param) ),
         expon_diff_tfp = (tfp_exponent_policy - tfp_exponent),
         expon_diff_amenity = (amenity_exponent_policy - amenity_exponent), 
-        log_wage_policy = logwage09 + expon_diff_tfp*log(tfp_term_09) - expon_diff_amenity*log_amenity_pm_09,
+        log_wage_policy = log(wage_condit_2009) + expon_diff_tfp*log(tfp_term_09) - expon_diff_amenity*log_amenity_pm_09,
         wage_policy = exp(log_wage_policy),
-        outout_arg_09_actual = adj_tfp_09*( (Pbar09/wage_condit_2009)^((1-eta_param)/land_param)  ),
+        outout_arg_09_actual = adj_tfp_09*( (price_avg_ratio_09/wage_condit_2009)^((1-eta_param)/land_param)  ),
         agg_output_arg_09_actual = sum(outout_arg_09_actual),
         output_09_actual = (eta_param/rate)^(eta_param/(1-eta_param))*(agg_output_arg_09_actual^(land_param/(1-eta_param))  )/1000000,
         emp2009_policy =  ( ( ( alpha_param^(1-eta_param)*(eta_param^eta_param)/(rate^eta_param) )/(wage_policy^(1-eta_param)) )^(1/land_param) )*adj_tfp_09,
         new_emp2009_policy = (1 - sum(emp2009_policy - emp2009)/sum(emp2009_policy) )*emp2009_policy  ,
         emp_share_09_policy = (new_emp2009_policy / sum(new_emp2009_policy) ),
         diff_empc = emp_share_09_policy - (emp1964/sum(emp1964)),
-        Pbar64c = sum(emp_share_09_policy*wage_policy),
-        output_arg_09_policy = adj_tfp_09*( (Pbar64c/wage_policy)^((1-eta_param)/land_param)  ),
+        price_avg_ratio_64_policy = sum(emp_share_09_policy*wage_policy),
+        output_arg_09_policy = adj_tfp_09*( (price_avg_ratio_64_policy/wage_policy)^((1-eta_param)/land_param)  ),
         agg_output_arg_09_policy = sum(output_arg_09_policy),
         output_09_policy = (eta_param/rate)^(eta_param/(1-eta_param))*(  agg_output_arg_09_policy^(land_param/(1-eta_param))  )/1000000,
-        output_arg_64_actual = adj_tfp_64 * ( (Pbar64/wage_condit_1964)^((1-eta_param)/land_param)  ),
+        output_arg_64_actual = adj_tfp_64 * ( (price_avg_ratio_64/wage_condit_1964)^((1-eta_param)/land_param)  ),
         agg_output_arg_64_actual = sum(output_arg_64_actual),
         output_64_actual = (eta_param/rate)^(eta_param/(1-eta_param))*(agg_output_arg_64_actual^(land_param/(1-eta_param))  )/1000000,
         diff09 = 
           ( (output_09_policy - output_64_actual) / 
               (output_09_actual - output_64_actual) ) - 1,
         diff09_welf_adj=
-          (( (output_09_policy/(Pbar64c/1e6) ) - (output_64_actual/(Pbar64/1e6) ) ) /  # hsieh renormalizes pbar by 1e6
-          ( (output_09_actual/(Pbar09/1e6) ) - (output_64_actual/(Pbar64/1e6) ) )) -1
+          (( (output_09_policy/(price_avg_ratio_64_policy/1e6) ) - (output_64_actual/(price_avg_ratio_64/1e6) ) ) /  # hsieh renormalizes pbar by 1e6
+          ( (output_09_actual/(price_avg_ratio_09/1e6) ) - (output_64_actual/(price_avg_ratio_64/1e6) ) )) -1
       )
     
     out_sum_tbl = 
@@ -320,9 +315,9 @@ hm_elasticity_experiment <-
       filter( msa %in% treatmsas ) |> 
       select(
         -c(
-          Pbar64, 
-          Pbar64c, 
-          Pbar09, 
+          price_avg_ratio_64, 
+          price_avg_ratio_64_policy, 
+          price_avg_ratio_09, 
           mean_WRI, 
           agg_output_arg_64_actual, 
           agg_output_arg_09_policy, 
