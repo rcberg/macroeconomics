@@ -3,17 +3,17 @@ library(tidyverse)
 # follows the model and policy experiments of Hsieh and Moretti (2019, AEJ: Macro).
 # see tables 4 and 5 of the paper
 
-params =
+params <- 
   c(0.65, # alpha
     0.25, # eta 
     0.4, # beta
     0.05 # rate R
   )
 
-brain_hubs = 
+brain_hubs <- 
   c( 5600, 7400, 7360 )
 
-rust_belts = 
+rust_belts <- 
   c(
     2640, 
     7610, 
@@ -57,7 +57,7 @@ rust_belts =
   )
 
 
-south_msas = 
+south_msas <- 
   c(
     40,
     120,
@@ -147,7 +147,7 @@ south_msas =
     9200
   )
 
-oth_large_msas = 
+oth_large_msas <- 
   c( 1123, 1600, 1640, 1840, 2080, 3480, 3760, 4120, 4480, 5080, 5120, 6160, 6200, 6440, 6780, 6920, 7160, 7320, 7600 )
 
 westcoast_hubs <- 
@@ -159,7 +159,7 @@ msa_list <-
   unlist() %>%
   as.numeric()
 
-base_data = 
+base_data <- 
   haven::read_dta("data/raw/hm_replication_files/data3.dta")
 
 hm_elasticity_experiment <- 
@@ -270,14 +270,14 @@ hm_elasticity_experiment <-
           ( (output_09_actual/price_avg_ratio_09 ) - (output_64_actual/price_avg_ratio_64 ) )) -1
       )
     
-    out_sum_tbl = 
+    out_sum_tbl <- 
       hsieh_moretti_data %>%
       summarise(
         policy_effect = 100*mean(diff09),
         welfare_effect  = 100*mean(diff09_welf_adj)
       )
     
-    out_data = 
+    out_data <- 
       hsieh_moretti_data |> 
       filter( msa %in% treatmsas ) |> 
       select(
@@ -297,7 +297,7 @@ hm_elasticity_experiment <-
     
     if( output == "nat"){
       if(label == T){
-        out_sum_tbl = 
+        out_sum_tbl <- 
           out_sum_tbl |> 
           mutate( 
             model = ifelse( theta_param> 0, "Imperfect Mobility","Perfect Mobility" )
@@ -307,7 +307,7 @@ hm_elasticity_experiment <-
       return(out_sum_tbl)
     }else{
       if(label == T){
-        out_data = 
+        out_data <- 
           out_data |> 
           mutate( 
             model = ifelse( theta_param> 0, "Imperfect Mobility","Perfect Mobility" )
@@ -319,97 +319,7 @@ hm_elasticity_experiment <-
     
   }
 
-brainhub_experiment_nat <- 
-  bind_rows(
-    map(
-      c(0,0.3),
-      hm_elasticity_experiment,
-      dataf = base_data, 
-      parameters = params , 
-      treatmsas = brain_hubs,
-      output = 'nat'
-    )
-  )
-
-brainhub_experiment_own <- 
-  bind_rows(
-    map(
-      c(0,0.3),
-      hm_elasticity_experiment,
-      dataf = base_data, 
-      parameters = params , 
-      treatmsas = brain_hubs,
-      output = 'own'
-    )
-  )
-
-westcoast_experiment_nat <- 
-  map(
-    c(0,0.3),
-    hm_elasticity_experiment,
-    dataf = base_data, 
-    parameters = params , 
-    treatmsas = westcoast_hubs,
-    output = 'nat'
-  ) |> 
-  bind_rows()
-
-westcoast_experiment_own <- 
-  map(
-    c(0,0.3),
-    hm_elasticity_experiment,
-    dataf = base_data, 
-    parameters = params , 
-    treatmsas = westcoast_hubs,
-    output = 'own'
-  ) |> 
-  bind_rows()
-
-pdx_experiment_nat = 
-  map(
-    c(0,0.3),
-    hm_elasticity_experiment,
-    dataf = base_data, 
-    parameters = params , 
-    treatmsas = 6440,
-    output = 'nat'
-  ) |> 
-  bind_rows()
-
-pdx_experiment_own = 
-  map(
-    c(0,0.3),
-    hm_elasticity_experiment,
-    dataf = base_data, 
-    parameters = params , 
-    treatmsas = 6440,
-    output = 'own'
-  ) |> 
-  bind_rows()
-
-pnw_experiment_nat = 
-  map(
-    c(0,0.3),
-    hm_elasticity_experiment,
-    dataf = base_data, 
-    parameters = params , 
-    treatmsas = c(6440, 7600),
-    output = 'nat'
-  ) |> 
-  bind_rows()
-
-pnw_experiment_own = 
-  map(
-    c(0,0.3),
-    hm_elasticity_experiment,
-    dataf = base_data, 
-    parameters = params , 
-    treatmsas = c(6440, 7600),
-    output = 'own'
-  ) |> 
-  bind_rows()
-
-hsieh_tbl_4 = 
+hsieh_tbl_4 <- 
   bind_rows(
     map(
       0,
@@ -457,7 +367,7 @@ hsieh_tbl_4 =
       mutate( change_in = "Other large cities")
   )
 
-hsieh_tbl_5 = 
+hsieh_tbl_5 <- 
   bind_rows(
     map(
       0.3,
@@ -507,3 +417,25 @@ hsieh_tbl_5 =
 
 hsieh_tbl_4 |> View()
 hsieh_tbl_5 |> View()
+
+westcoast_experiment_nat <- 
+  map(
+    c(0,0.3),
+    hm_elasticity_experiment,
+    dataf = base_data, 
+    parameters = params , 
+    treatmsas = westcoast_hubs,
+    output = 'nat'
+  ) |> 
+  bind_rows()
+
+westcoast_experiment_own <- 
+  map(
+    c(0,0.3),
+    hm_elasticity_experiment,
+    dataf = base_data, 
+    parameters = params , 
+    treatmsas = westcoast_hubs,
+    output = 'own'
+  ) |> 
+  bind_rows()
