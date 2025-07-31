@@ -11,11 +11,7 @@ params =
   )
 
 brain_hubs = 
-  c(
-    5600,
-    7400,
-    7360
-  )
+  c( 5600, 7400, 7360 )
 
 rust_belts = 
   c(
@@ -152,37 +148,10 @@ south_msas =
   )
 
 oth_large_msas = 
-  c(
-    1123, 
-    1600, 
-    1640, 
-    1840, 
-    2080, 
-    3480, 
-    3760, 
-    4120, 
-    4480, 
-    5080, 
-    5120, 
-    6160, 
-    6200, 
-    6440, 
-    6780, 
-    6920, 
-    7160, 
-    7320, 
-    7600
-  )
+  c( 1123, 1600, 1640, 1840, 2080, 3480, 3760, 4120, 4480, 5080, 5120, 6160, 6200, 6440, 6780, 6920, 7160, 7320, 7600 )
 
 westcoast_hubs <- 
-  c(1600,
-    1920,
-    3360,
-    4480,
-    5600,
-    7360,
-    7400
-  )
+  c( 1600, 1920, 3360, 4480, 5600, 7360, 7400 )
 
 msa_list <- 
   read_csv("data/raw/hm_replication_files/hsieh_moretti_msa_labels.csv") %>%
@@ -281,7 +250,7 @@ hm_elasticity_experiment <-
         wage_policy = exp(log_wage_policy),
         outout_arg_09_actual = adj_tfp_09*( (price_avg_ratio_09/wage_condit_2009)^((1-eta_param)/land_param)  ),
         agg_output_arg_09_actual = sum(outout_arg_09_actual),
-        output_09_actual = (eta_param/rate)^(eta_param/(1-eta_param))*(agg_output_arg_09_actual^(land_param/(1-eta_param))  )/1000000,
+        output_09_actual = (eta_param/rate)^(eta_param/(1-eta_param))*(agg_output_arg_09_actual^(land_param/(1-eta_param))  ),
         emp2009_policy =  ( ( ( alpha_param^(1-eta_param)*(eta_param^eta_param)/(rate^eta_param) )/(wage_policy^(1-eta_param)) )^(1/land_param) )*adj_tfp_09,
         new_emp2009_policy = (1 - sum(emp2009_policy - emp2009)/sum(emp2009_policy) )*emp2009_policy  ,
         emp_share_09_policy = (new_emp2009_policy / sum(new_emp2009_policy) ),
@@ -289,16 +258,16 @@ hm_elasticity_experiment <-
         price_avg_ratio_64_policy = sum(emp_share_09_policy*wage_policy),
         output_arg_09_policy = adj_tfp_09*( (price_avg_ratio_64_policy/wage_policy)^((1-eta_param)/land_param)  ),
         agg_output_arg_09_policy = sum(output_arg_09_policy),
-        output_09_policy = (eta_param/rate)^(eta_param/(1-eta_param))*(  agg_output_arg_09_policy^(land_param/(1-eta_param))  )/1000000,
+        output_09_policy = (eta_param/rate)^(eta_param/(1-eta_param))*(  agg_output_arg_09_policy^(land_param/(1-eta_param))  ),
         output_arg_64_actual = adj_tfp_64 * ( (price_avg_ratio_64/wage_condit_1964)^((1-eta_param)/land_param)  ),
         agg_output_arg_64_actual = sum(output_arg_64_actual),
-        output_64_actual = (eta_param/rate)^(eta_param/(1-eta_param))*(agg_output_arg_64_actual^(land_param/(1-eta_param))  )/1000000,
+        output_64_actual = (eta_param/rate)^(eta_param/(1-eta_param))*(agg_output_arg_64_actual^(land_param/(1-eta_param))  ),
         diff09 = 
           ( (output_09_policy - output_64_actual) / 
               (output_09_actual - output_64_actual) ) - 1,
         diff09_welf_adj=
-          (( (output_09_policy/(price_avg_ratio_64_policy/1e6) ) - (output_64_actual/(price_avg_ratio_64/1e6) ) ) /  # hsieh renormalizes pbar by 1e6
-          ( (output_09_actual/(price_avg_ratio_09/1e6) ) - (output_64_actual/(price_avg_ratio_64/1e6) ) )) -1
+          (( (output_09_policy/price_avg_ratio_64_policy ) - (output_64_actual/price_avg_ratio_64 ) ) /  # hsieh renormalizes pbar by 1e6
+          ( (output_09_actual/price_avg_ratio_09 ) - (output_64_actual/price_avg_ratio_64 ) )) -1
       )
     
     out_sum_tbl = 

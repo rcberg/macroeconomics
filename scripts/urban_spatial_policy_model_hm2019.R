@@ -3,25 +3,17 @@ library(tidyverse)
 # follows the model and policy experiments of Hsieh and Moretti (2019, AEJ: Macro).
 # see tables 4 and 5 of the paper
 
-params =
-  c(0.65, # alpha
-    0.25, # eta 
-    0.4, # beta
-    0.05, # rate R
-    0.3   # theta (inverse) parameter
-  )
-
-alpha_param <- params[1]
-eta_param <- params[2]
-beta_param <- params[3]
-rate <- params[4]
-theta_param <- params[5]
+alpha_param <- 0.65
+eta_param <- 0.25
+beta_param <- 0.4
+rate <- 0.05
+theta_param <- 0.3
 land_param = 1 - alpha_param - eta_param
 
-tfp_constant = 
+tfp_constant <- 
   (alpha_param^(1-eta_param))*((eta_param/rate)^eta_param)
 
-treated_msas = 
+treated_msas <- 
   c(
     5600,
     7400,
@@ -75,7 +67,7 @@ hsieh_moretti_data <-
     amenity_exponent = land_param / ( beta_param*inverse + 1-alpha_param -eta_param - beta_param*inverse*eta_param +theta_param - eta_param*theta_param)
   )
 
-policy_df = 
+policy_df <- 
   hsieh_moretti_data |> 
   mutate(
     invelasticity_intercept = mean(inverse) - mean(-5.260*unaval + .475*(log(populat_saiz)*unaval) + .280*WRLURI),
