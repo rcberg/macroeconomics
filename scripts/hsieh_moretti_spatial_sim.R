@@ -266,7 +266,7 @@ hm_elasticity_experiment <-
           ( (output_09_policy - output_64_actual) / 
               (output_09_actual - output_64_actual) ) - 1,
         diff09_welf_adj=
-          (( (output_09_policy/price_avg_ratio_64_policy ) - (output_64_actual/price_avg_ratio_64 ) ) /  # hsieh renormalizes pbar by 1e6
+          (( (output_09_policy/price_avg_ratio_64_policy ) - (output_64_actual/price_avg_ratio_64 ) ) / 
           ( (output_09_actual/price_avg_ratio_09 ) - (output_64_actual/price_avg_ratio_64 ) )) -1
       )
     

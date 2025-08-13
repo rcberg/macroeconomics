@@ -90,7 +90,10 @@ policy_df <-
     foc_labor = 
       (tfp_term_09/(wage_condit_2009^(1-eta_param)) )^(1/land_param),
     wage_policy = 
-      (tfp_term_09^tfp_exponent_policy)*(q_raw_wage^amenity_exponent_policy),
+      wage_condit_2009* # this is hm version, is it correct?
+      (tfp_term_09^(tfp_exponent_policy - tfp_exponent))/
+      (amenity_pm_09^(amenity_exponent_policy - amenity_exponent)),
+      #(tfp_term_09^tfp_exponent_policy)*(q_raw_wage^amenity_exponent_policy),
     emp_policy = 
       (tfp_term_09/(wage_policy^(1-eta_param)) )^(1/land_param)
   )
@@ -111,7 +114,9 @@ policy_df |>
     output_64 = ((eta_param/rate)^(eta_param/(1-eta_param)))*(output_term_64^(((1-eta_param)*(1+theta_param) - alpha_param)/(1-eta_param))),
     output_09 = ((eta_param/rate)^(eta_param/(1-eta_param)))*(output_term_09^(((1-eta_param)*(1+theta_param) - alpha_param)/(1-eta_param))),
     output_diff = (agg_output_policy - output_64)/(output_09 - output_64) - 1,
-    welfare_diff = ((agg_output_policy/price_ratio_policy) - (output_64/price_avg_ratio_64))/((output_09/price_avg_ratio_09) - (output_64/price_avg_ratio_64)) - 1
+    welfare_diff = 
+      ((agg_output_policy/price_ratio_policy) - (output_64/price_avg_ratio_64))/
+      ((output_09/price_avg_ratio_09) - (output_64/price_avg_ratio_64)) - 1
   ) |>
   summarize(
     output_pct_diff = mean(output_diff)*100,
@@ -127,3 +132,4 @@ policy_df |>
 #
 #policy_df |> 
 #  lm( formula = q_raw_wage ~ q_raw_labor ) |> summary()
+#
