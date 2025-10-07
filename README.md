@@ -1,6 +1,9 @@
 # Macroeconomics
 This repository was initiated to store models and code for macroeconomic modeling, data, and analysis.
 
+## Neoclassical Model of Location
+[Check out](https://github.com/rcberg/macroeconomics/tree/main/scripts/neoclassical-location-model) this cool, in-progress project where I am building the full, nonlinear general equilibrium model from [Albouy and Stuart (2020)](https://doi.org/10.1111/iere.12419). 
+
 ## Mosquito problem solution
 A worked-through answer to an old macroeconomics preliminary exam question: [Click here](https://raw.githack.com/rcberg/macroeconomics/master/reports/mosquito-problem/mosquito_macro_problem.html)
 
