@@ -1,7 +1,7 @@
 using NonlinearSolve
 import Plots
 
-include("ge-model-function.jl")
+include("ge-symbolic-model-function.jl")
 
 #u0 = [1.0, 1.0, 0.5, 1.0, 1.0, 0.5, 6.0, 4.0, 6.0, 4.0, 1.0, 9.0, 13.0, 100.0, 120.0, 1.0]
 u0 = ones(15)
