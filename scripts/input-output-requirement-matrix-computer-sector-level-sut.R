@@ -132,3 +132,31 @@ ind_comp_total_req_matrix =
 
 ind_error_matrix = # industry x industry
   ind_comp_total_req_matrix - ind_total_req_matrix
+
+# plots of errors compared to official BEA total requirements matrix
+hist(
+  com_error_matrix,
+  breaks = 30,
+  xlab = "Deviation from BEA",
+  ylab = "Number of matrix entries",
+  main = "Commodity-by-commodity requirement table error"
+)
+text(-0.12, 69, bquote(sigma == .(round(sd(as.vector(com_error_matrix)), 5 ))))
+
+hist(
+  ind_com_error_matrix,
+  breaks = 30,
+  xlab = "Deviation from BEA",
+  ylab = "Number of matrix entries",
+  main = "Industry-by-commodity requirement table error"
+)
+text(-0.11, 50, bquote(sigma == .(round(sd(as.vector(ind_com_error_matrix)), 5 ))))
+
+hist(
+  ind_error_matrix,
+  breaks = 30,
+  xlab = "Deviation from BEA",
+  ylab = "Number of matrix entries",
+  main = "Industry-by-industry requirement table error"
+)
+text(-0.13, 53, bquote(sigma == .(round(sd(as.vector(ind_error_matrix)), 5 ))))
