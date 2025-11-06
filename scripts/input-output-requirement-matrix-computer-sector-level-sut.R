@@ -10,56 +10,60 @@ library(tidyverse)
 # uses IO data from BEA for 2017, see: https://www.bea.gov/itable/input-output
 use_df = 
   readxl::read_excel(
-    "data/raw/input-output-tables/sector-level/use_before_redef_prod_price.xlsx",
-    skip = 8
+    "data/raw/input-output-tables/sector-level/use.xlsx",
+    skip = 6
   ) |> 
-  mutate( across(`Agriculture, forestry, fishing, and hunting`:`Total Commodity Output`, ~replace_na(.,0))) 
+  mutate( across(`Agriculture, forestry, fishing, and hunting`:`Total use of products`, ~replace_na(.,0))) 
 
 use_matrix = 
   use_df |> 
-  filter( !is.na(Code), !startsWith(Code,"V")) |> 
+  filter( !is.na(Code), !startsWith(Code,"V"), !startsWith(Code,"T")) |> 
   select(`Agriculture, forestry, fishing, and hunting`:`Government`) |> 
   as.matrix()
 
-make_df = 
+supply_df = 
   readxl::read_excel(
-    "data/raw/input-output-tables/sector-level/make.xlsx",
-    skip = 9
+    "data/raw/input-output-tables/sector-level/supply.xlsx",
+    skip = 6
   ) |> 
-  mutate( across(`Agriculture, forestry, fishing, and hunting`:`Total Industry Output`, ~replace_na(.,0))) 
+  mutate( across(`Agriculture, forestry, fishing, and hunting`:`Total product supply (purchaser prices)`, ~replace_na(.,0))) 
 
-make_matrix = 
-  make_df |> 
+supply_matrix = 
+  supply_df |> 
   filter( !is.na(Code) ) |> 
-  select(`Agriculture, forestry, fishing, and hunting`:`Noncomparable imports and rest-of-the-world adjustment /2/`) |> 
+  select(`Agriculture, forestry, fishing, and hunting`:`Government`) |> 
   as.matrix()
 
+make_matrix =
+  t(supply_matrix)
+
 commodity_output_col = 
-  make_df |> 
-  filter( Name == "Total Commodity Output") |> 
-  select(`Agriculture, forestry, fishing, and hunting`:`Noncomparable imports and rest-of-the-world adjustment /2/`) |> 
-  unlist()
+  supply_df$`Total Commodity Output`[!is.na(supply_df$Code)]
 
 q_hat = 
   diag(commodity_output_col)
 q_hat.inv =
   solve(q_hat)
 
-industry_total_output_col = 
-  make_df$`Total Industry Output`[!is.na(make_df$Code)]
+ind_total_output_col = 
+  supply_df[supply_df$Name == "Total industry supply",] |> 
+  select(`Agriculture, forestry, fishing, and hunting`:`Government`) |> 
+  unlist()
 
 scrap_col = 
-  make_df$`Scrap, used and secondhand goods /1/`[!is.na(make_df$Code)]
+  supply_df[grepl("Scrap",supply_df$Name),] |> 
+  select(`Agriculture, forestry, fishing, and hunting`:`Government`) |> 
+  unlist()
 
 industry_output_col = 
-  industry_total_output_col - scrap_col
+  ind_total_output_col - scrap_col
 
-nonscrap_ratio =
-  industry_output_col/industry_total_output_col
+nonscrap_ratio = 
+  industry_output_col/ind_total_output_col
 
 nonscrap_ratio_hat = diag(nonscrap_ratio)
 nonscrap_ratio_hat.inv = solve(nonscrap_ratio_hat)
-g_hat = diag(industry_total_output_col)
+g_hat = diag(ind_total_output_col)
 g_hat.inv = solve(g_hat)
 
 direct_input_coef_matrix = 
@@ -78,7 +82,7 @@ direct_coef_matrix =
 
 com_total_req_matrix_uninv = 
   diag(nrow(direct_coef_matrix)) - direct_coef_matrix
-com_total_req_matrix = 
+com_total_req_matrix = # commodity x commodity
   solve(com_total_req_matrix_uninv) # this seems to work!
 
 com_comp_total_req_matrix = 
@@ -90,20 +94,11 @@ com_comp_total_req_matrix =
   select(!c(Code,`Commodity Description`)) |> 
   as.matrix()
 
-com_error_matrix =  # commodity x commodity
+com_error_matrix = # commodity x commodity
   com_comp_total_req_matrix - com_total_req_matrix
 
 ind_com_total_req_matrix = # industry x commodity
   transformation_matrix%*%com_total_req_matrix
-
-wb_matrix = 
-  transformation_matrix%*%direct_input_coef_matrix
-
-reverse_direct_coefs.uninv = # industry x industry
- diag(nrow(wb_matrix)) - wb_matrix
-
-ind_total_req_matrix = # industry x industry
-  solve(reverse_direct_coefs.uninv)
 
 ind_com_comp_total_req_matrix = 
   readxl::read_excel(
@@ -114,8 +109,17 @@ ind_com_comp_total_req_matrix =
   select(!c(Code,`Industry Description`)) |> 
   as.matrix()
 
-ind_com_error_matrix = 
+ind_com_error_matrix = # industry x commodity
   ind_com_comp_total_req_matrix - ind_com_total_req_matrix
+
+wb_matrix = 
+  transformation_matrix%*%direct_input_coef_matrix
+
+reverse_direct_coefs.uninv = # industry x industry
+ diag(nrow(wb_matrix)) - wb_matrix
+
+ind_total_req_matrix = # industry x industry
+  solve(reverse_direct_coefs.uninv)
 
 ind_comp_total_req_matrix = 
     readxl::read_excel(
@@ -126,5 +130,5 @@ ind_comp_total_req_matrix =
   select(!c(Code,`Industry Description`)) |> 
   as.matrix()
 
-ind_error_matrix = 
+ind_error_matrix = # industry x industry
   ind_comp_total_req_matrix - ind_total_req_matrix
