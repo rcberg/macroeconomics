@@ -85,6 +85,21 @@ com_total_req_matrix_uninv =
 com_total_req_matrix = # commodity x commodity
   solve(com_total_req_matrix_uninv) # this seems to work!
 
+ind_com_total_req_matrix = # industry x commodity
+  transformation_matrix%*%com_total_req_matrix
+
+wb_matrix = 
+  transformation_matrix%*%direct_input_coef_matrix
+
+reverse_direct_coefs.uninv = # industry x industry
+ diag(nrow(wb_matrix)) - wb_matrix
+
+ind_total_req_matrix = # industry x industry
+  solve(reverse_direct_coefs.uninv)
+
+# plots of errors compared to official BEA total requirements matrix
+# feel free to comment these out if not needed
+
 com_comp_total_req_matrix = 
   readxl::read_excel(
     "data/raw/input-output-tables/sector-level/com-com_total_requirement.xlsx",
@@ -96,9 +111,6 @@ com_comp_total_req_matrix =
 
 com_error_matrix = # commodity x commodity
   com_comp_total_req_matrix - com_total_req_matrix
-
-ind_com_total_req_matrix = # industry x commodity
-  transformation_matrix%*%com_total_req_matrix
 
 ind_com_comp_total_req_matrix = 
   readxl::read_excel(
@@ -112,15 +124,6 @@ ind_com_comp_total_req_matrix =
 ind_com_error_matrix = # industry x commodity
   ind_com_comp_total_req_matrix - ind_com_total_req_matrix
 
-wb_matrix = 
-  transformation_matrix%*%direct_input_coef_matrix
-
-reverse_direct_coefs.uninv = # industry x industry
- diag(nrow(wb_matrix)) - wb_matrix
-
-ind_total_req_matrix = # industry x industry
-  solve(reverse_direct_coefs.uninv)
-
 ind_comp_total_req_matrix = 
     readxl::read_excel(
     "data/raw/input-output-tables/sector-level/ind-ind_total_requirement.xlsx",
@@ -133,7 +136,6 @@ ind_comp_total_req_matrix =
 ind_error_matrix = # industry x industry
   ind_comp_total_req_matrix - ind_total_req_matrix
 
-# plots of errors compared to official BEA total requirements matrix
 hist(
   com_error_matrix,
   breaks = 30,
