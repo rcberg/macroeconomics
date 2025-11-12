@@ -83,18 +83,15 @@ industry_output_col =
   select(`1111A0`:`S00203`, -`4200ID`) |> 
   as.numeric()
 
-#scrap_col = 
-#  filter( supply_df, Code == "S00401" ) |> 
-#  select(`1111A0`:`S00203`, -`4200ID`) |> 
-#  as.numeric()
-#
-#industry_output_col = 
-#  industry_output_total - scrap_col
-#
-#nonscrap_ratio = industry_output_col/industry_output_total
-#
-#nonscrap_ratio_hat = diag(nonscrap_ratio)
-#nonscrap_ratio_hat.inv = solve(nonscrap_ratio_hat)
+scrap_col = 
+  filter( supply_df, Code == "S00401" ) |> 
+  select(`1111A0`:`S00203`, -`4200ID`) |> 
+  as.numeric()
+
+nonscrap_ratio = (industry_output_col - scrap_col)/industry_output_col
+
+nonscrap_ratio_hat = diag(nonscrap_ratio)
+nonscrap_ratio_hat.inv = solve(nonscrap_ratio_hat)
 
 g_hat = diag(industry_output_col)
 g_hat.inv = solve(g_hat)
@@ -114,32 +111,25 @@ direct_input_coef_matrix =
 mkt_share_matrix = 
   make_matrix%*%q_hat.inv
 
+transformation_matrix = 
+  nonscrap_ratio_hat.inv%*%mkt_share_matrix
+
 direct_coef_matrix = 
-  direct_input_coef_matrix%*%mkt_share_matrix
+  direct_input_coef_matrix%*%transformation_matrix
 
 com_total_req_matrix_uninv = 
   diag(nrow(direct_coef_matrix)) - direct_coef_matrix
 com_total_req_matrix = # commodity x commodity
   solve(com_total_req_matrix_uninv)
 
-#comp_total_req_matrix = 
-#  read_excel(
-#    "data/raw/input-output-tables/detail-level/com-com_total_requirement.xlsx", 
-#    sheet = '2017',skip = 4
-#  ) |> 
-#  filter( Code != "T010" ) |> 
-#  select(`1111A0`:`S00900`) |> 
-#  unname() |> 
-#  as.matrix()
-#
-#error_matrix = 
-#  comp_total_req_matrix[-c(400:401),-c(400:401)] - total_req_matrix
-
 ind_com_total_req_matrix = # industry x commodity
-  mkt_share_matrix%*%com_total_req_matrix
+  transformation_matrix%*%com_total_req_matrix
 
-ind_total_req_matrix = # industry x industry
-  mkt_share_matrix%*%direct_input_coef_matrix
+ind_total_req_matrix_uninv = # industry x industry
+  transformation_matrix%*%direct_input_coef_matrix
+
+ind_total_req_matrix = 
+  solve(diag(nrow(ind_total_req_matrix_uninv)) - ind_total_req_matrix_uninv)
 
 # validating the total requirements tables
 # see last paragraph on p.'12-14' of reference text 1
@@ -185,11 +175,11 @@ ggplot( tot_req_validate_df, aes( x = check_column, y = actual_column) ) +
   theme_minimal()
 
 # just an error plot
-#ggplot( tot_req_validate_df, aes( x = error_rate_vs_actual, fill = output_type) ) + 
-#  geom_histogram( bins = 20, color = NA, position = 'dodge') + 
-#  labs( x = "Error rate (% from actual)", y = "Number of output categories", fill = "Output type") +
-#  scale_x_continuous(labels = scales::percent_format()) +
-#  theme_minimal()
+ggplot( tot_req_validate_df, aes( x = error_rate_vs_actual, fill = output_type) ) + 
+  geom_histogram( bins = 20, color = NA, position = 'dodge') + 
+  labs( x = "Error rate (% from actual)", y = "Number of output categories", fill = "Output type") +
+  scale_x_continuous(labels = scales::percent_format()) +
+  theme_minimal()
 
 lm( actual_column ~ check_column, tot_req_validate_df ) |> summary()
 
@@ -260,7 +250,7 @@ lm( actual_column ~ check_column, tot_req_validate_df ) |> summary()
 #  ylab = "Number of matrix entries",
 #  main = "Industry-by-industry requirement table error"
 #)
-#text(0.95, 60000, bquote(sigma == .(round(sd(as.vector(ind_error_matrix)), 5 ))))
+#text(0.2, 60000, bquote(sigma == .(round(sd(as.vector(ind_error_matrix)), 5 ))))
 #
 #tibble(
 #  computed = as.vector(ind_total_req_matrix),
@@ -272,7 +262,21 @@ lm( actual_column ~ check_column, tot_req_validate_df ) |> summary()
 #  theme_minimal()
 #
 #tibble(
-#  computed = as.vector(ind_com_total_req_matrix),
-#  bea = as.vector(ind_com_comp_total_req_matrix)
+#  computed = as.vector(ind_total_req_matrix),
+#  bea = as.vector(ind_comp_total_req_matrix)
 #) |> 
 #  lm( formula = bea ~ computed ) |> summary()
+#
+#ind_com_total_req_matrix |> 
+#  as.data.frame() |> 
+#  write_csv( 
+#  "data/export/input-output-tables/ind_com_total_requirement_computed.csv")
+#
+#com_total_req_matrix |> 
+#  as.data.frame() |> 
+#  write_csv( 
+#  "data/export/input-output-tables/com_com_total_requirement_computed.csv")
+#
+#final_uses_col |> 
+#  as.data.frame() |> 
+#  write_csv("data/export/input-output-tables/final_uses_2017_adjusted.csv")

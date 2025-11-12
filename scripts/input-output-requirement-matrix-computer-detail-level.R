@@ -127,8 +127,12 @@ com_total_req_matrix = # commodity x commodity
 ind_com_total_req_matrix = # industry x commodity
   transformation_matrix%*%com_total_req_matrix
 
-ind_total_req_matrix = # industry x industry
+ind_total_req_matrix_uninv = # industry x industry
   transformation_matrix%*%direct_input_coef_matrix
+
+ind_total_req_matrix = 
+  solve(diag(nrow(ind_total_req_matrix_uninv)) - ind_total_req_matrix_uninv)
+
 
 # validating the total requirements tables
 # see last paragraph on p.'12-14' of reference text 1
@@ -157,11 +161,11 @@ ggplot( tot_req_validate_df, aes( x = check_column, y = actual_column) ) +
   scale_y_continuous(labels = scales::dollar_format()) +
   theme_minimal()
 
-#ggplot( tot_req_validate_df, aes( x = error_rate_vs_actual, fill = output_type) ) + 
-#  geom_histogram( bins = 20, color = NA, position = 'dodge') + 
-#  labs( x = "Error rate (% from actual)", y = "Number of output categories", fill = "Output type") +
-#  scale_x_continuous(labels = scales::percent_format()) +
-#  theme_minimal()
+ggplot( tot_req_validate_df, aes( x = error_rate_vs_actual, fill = output_type) ) + 
+  geom_histogram( bins = 20, color = NA, position = 'dodge') + 
+  labs( x = "Error rate (% from actual)", y = "Number of output categories", fill = "Output type") +
+  scale_x_continuous(labels = scales::percent_format()) +
+  theme_minimal()
 
 lm( actual_column ~ check_column, tot_req_validate_df ) |> summary()
 
@@ -232,11 +236,11 @@ lm( actual_column ~ check_column, tot_req_validate_df ) |> summary()
 #  ylab = "Number of matrix entries",
 #  main = "Industry-by-industry requirement table error"
 #)
-#text(0.7, 80000, bquote(sigma == .(round(sd(as.vector(ind_error_matrix)), 5 ))))
+#text(0.1, 60000, bquote(sigma == .(round(sd(as.vector(ind_error_matrix)), 5 ))))
 #
 #tibble(
-#  computed = as.vector(com_total_req_matrix),
-#  bea = as.vector(com_comp_total_req_matrix)
+#  computed = as.vector(ind_com_total_req_matrix),
+#  bea = as.vector(ind_com_comp_total_req_matrix)
 #) |> 
 #  ggplot( aes( x = computed, y = bea)) + 
 #  geom_point() + 
@@ -248,3 +252,4 @@ lm( actual_column ~ check_column, tot_req_validate_df ) |> summary()
 #  bea = as.vector(ind_com_comp_total_req_matrix)
 #) |> 
 #  lm( formula = bea ~ computed ) |> summary()
+#

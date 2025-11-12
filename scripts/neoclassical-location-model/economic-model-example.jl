@@ -1,30 +1,34 @@
 using NonlinearSolve
 import Plots
 
-include("ge-symbolic-model-function.jl")
-
 #u0 = [1.0, 1.0, 0.5, 1.0, 1.0, 0.5, 6.0, 4.0, 6.0, 4.0, 1.0, 9.0, 13.0, 100.0, 120.0, 1.0]
 u0 = ones(15)
 params = 
-    (s_y  = 0.36, 
+    (s_y = 0.36, 
     θ_l = 0.025, 
     θ_n = 0.825, 
     ϕ_l = 0.233, 
     ϕ_n = 0.617, 
-    L_tot= 0.1, 
-    N_tot = 1.0, 
-    ρ = 0.05, 
+    L_tot= 1.0, 
+    N_tot = 10.0, 
+    ρ = 0.1, 
     σ = 0.667, 
     τ = 0.361, 
     q = 1.0, 
     a_x = 1.0, 
     a_y = 1.0)
 
+if params.σ == 1.0
+    include("ge-symbolic-cobbd-model-function.jl")
+else
+    include("ge-symbolic-model-function.jl")
+end
+
 prob = NonlinearProblem(f!, u0, params)
 sol = solve(prob, LevenbergMarquardt(), maxiters = 10000)
 sol_transformed = sol.u .^2
 Plots.plot(sol.resid)
-println(sol_transformed)
+#println(sol_transformed)
 Plots.plot(sol_transformed)
 
 # checks:

@@ -52,9 +52,9 @@ for i=2:lnth
         ρ = 0.05, 
         σ = 0.667, 
         τ = 0.361, 
-        q = 1, 
-        a_x = 1, 
-        a_y = 1)
+        q = 1.0, 
+        a_x = 1.0, 
+        a_y = 1.0)
         
         prob = NonlinearProblem(f!, u0, params)
         sol = solve(prob, maxiters = 1000)
