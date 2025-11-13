@@ -35,15 +35,49 @@ Plots.scatter(output_computed)
 final_uses_columns = 
     replace!(XLSX.readdata( "data/raw/input-output-tables/detail-level/use.xlsx", 
         "2017", "OP7:PH408" ), 
-        missing => 0)
+        missing => 0)[setdiff(1:end, (279, 399, 400, 401, 402)),:]
+domestic_final_uses = 
+    final_uses_columns[:,setdiff(1:end,7)]
+final_uses_vec = 
+    sum( domestic_final_uses, dims = 2 )
 
 use_export_col = 
+    final_uses_columns[:,7]
+
+use_va_row = 
     replace!(XLSX.readdata( "data/raw/input-output-tables/detail-level/use.xlsx", 
-        "2017", "OV7:OV408" ), 
-        missing => 0)
+        "2017", "C413:ON413" ), 
+        missing => 0)[setdiff(1:end, 278)]
 
 intermed_use_matrix = 
     replace!(XLSX.readdata( "data/raw/input-output-tables/detail-level/use.xlsx", 
         "2017", "C7:ON408" ), 
-        missing => 0)
+        missing => 0)[setdiff(1:end, (279, 399, 400, 401, 402)), setdiff(1:end, 278)]
+
+use_matrix_shares = 
+    copy(intermed_use_matrix)
+use_va_shares = 
+    use_va_row/sum(use_va_row)
+
+import_row = 
+    transpose(
+        sum(replace!(XLSX.readdata( "data/raw/input-output-tables/detail-level/supply.xlsx", 
+        "2017", "OP7:OQ408" ), 
+        missing => 0)[setdiff(1:end, (279, 399, 400, 401, 402)),:], dims = 2)
+    )
+
+for i in axes(use_matrix_shares, 1)
+    if sum(use_matrix_shares[i,:]) == 0 
+        use_matrix_shares[i,:] = zeros( size(use_matrix_shares, 2) )
+    else 
+        use_matrix_shares[i,:] = use_matrix_shares[i,:]/sum(use_matrix_shares[i,:])
+    end
+end
+
+intermed_make_matrix = 
+    transpose(
+        replace!(XLSX.readdata( "data/raw/input-output-tables/detail-level/supply.xlsx", 
+        "2017", "C7:ON408" ), 
+        missing => 0)[setdiff(1:end, (279, 399, 400, 401, 402)), setdiff(1:end, 278)]
+    )
 
