@@ -3,7 +3,7 @@ using Ipopt
 using Plots
 
 # 1. Model constants/calibration targets
- const σ_D = 0.667
+const σ_D = 0.667
 const σ_X = 0.667
 const σ_Y = 0.667
 const α = (σ_D - 1) / σ_D
@@ -149,18 +149,20 @@ for var in ["Q", "AX", "AY"]
         small_city = Model(Ipopt.Optimizer)
         set_optimizer_attribute(small_city, "print_level", 0)
 
+        # we have to put _small after a lot of these or julia throws us a lot of scope warnings
+        # they don't affect anything in this script, but are annoying, and could concievably be an issue if used in a bigger project
         if var == "Q"
-            AX = 1.0
-            AY = 1.0
-            Q = val
+            AX_small = 1.0
+            AY_small = 1.0
+            Q_small = val
         elseif var == "AX"
-            AX = val
-            AY = 1.0
-            Q = 1.0
+            AX_small = val
+            AY_small = 1.0
+            Q_small = 1.0
         elseif var == "AY"
-            AX = 1.0
-            AY = val
-            Q = 1.0
+            AX_small = 1.0
+            AY_small = val
+            Q_small = 1.0
         else
             error("Please supply 'AX,' 'AY,' or 'Q' as arguments")
         end
@@ -169,183 +171,183 @@ for var in ["Q", "AX", "AY"]
         if var == "Q" && 0.8 <= val <= 0.84
             @variables(small_city, begin
                 N_small, (start = 0.0001) # Total Population
-                w, (start = 0.65)        # Wage
-                p, (start = 0.65)        # Price of Y
-                r, (start = 0.005)       # Land rent
-                x, (start = 0.55); y, (start = 0.55) # Consumption
-                X, (start = 0.00001); Y, (start = 0.00001) # Production Output
-                NX, (start = 0.00001); NY, (start = 0.00001) # Labor Demands
-                LX, (start = 0.0004); LY, (start = 0.0004) # Land Demands
-                KX, (start = 0.000001); KY, (start = 0.000001) # Capital Demands
-                K, (start = 0.000001)        # Total Capital
+                w_small, (start = 0.65)        # Wage
+                p_small, (start = 0.65)        # Price of Y
+                r_small, (start = 0.005)       # Land rent
+                x_small, (start = 0.55); y_small, (start = 0.55) # Consumption
+                X_small, (start = 0.00001); Y_small, (start = 0.00001) # Production Output
+                NX_small, (start = 0.00001); NY_small, (start = 0.00001) # Labor Demands
+                LX_small, (start = 0.0004); LY_small, (start = 0.0004) # Land Demands
+                KX_small, (start = 0.000001); KY_small, (start = 0.000001) # Capital Demands
+                K_small, (start = 0.000001)        # Total Capital
             end)
         elseif var == "Q" && 0.841 <= val <= 1.0
             @variables(small_city, begin
                 N_small, (start = 0.0001) # Total Population
-                w, (start = 0.7)        # Wage
-                p, (start = 0.7)        # Price of Y
-                r, (start = 0.05)       # Land rent
-                x, (start = 0.4); y, (start = 0.4) # Consumption
-                X, (start = 0.0003); Y, (start = 0.0003) # Production Output
-                NX, (start = 0.0003); NY, (start = 0.0003) # Labor Demands
-                LX, (start = 0.0004); LY, (start = 0.0004) # Land Demands
-                KX, (start = 0.00001); KY, (start = 0.00001) # Capital Demands
-                K, (start = 0.00001)        # Total Capital
+                w_small, (start = 0.7)        # Wage
+                p_small, (start = 0.7)        # Price of Y
+                r_small, (start = 0.05)       # Land rent
+                x_small, (start = 0.4); y_small, (start = 0.4) # Consumption
+                X_small, (start = 0.0003); Y_small, (start = 0.0003) # Production Output
+                NX_small, (start = 0.0003); NY_small, (start = 0.0003) # Labor Demands
+                LX_small, (start = 0.0004); LY_small, (start = 0.0004) # Land Demands
+                KX_small, (start = 0.00001); KY_small, (start = 0.00001) # Capital Demands
+                K_small, (start = 0.00001)        # Total Capital
             end)
         
         elseif var == "Q" && 1.001 <= val <= 1.2
             @variables(small_city, begin
                 N_small, (start = 0.001) # Total Population
-                w, (start = 0.8)        # Wage
-                p, (start = 0.8)        # Price of Y
-                r, (start = 0.07)       # Land rent
-                x, (start = 0.4); y, (start = 0.4) # Consumption
-                X, (start = 0.0001); Y, (start = 0.0001) # Production Output
-                NX, (start = 0.0001); NY, (start = 0.0001) # Labor Demands
-                LX, (start = 0.0001); LY, (start = 0.0001) # Land Demands
-                KX, (start = 0.0001); KY, (start = 0.0001) # Capital Demands
-                K, (start = 0.0001)        # Total Capital
+                w_small, (start = 0.8)        # Wage
+                p_small, (start = 0.8)        # Price of Y
+                r_small, (start = 0.07)       # Land rent
+                x_small, (start = 0.4); y_small, (start = 0.4) # Consumption
+                X_small, (start = 0.0001); Y_small, (start = 0.0001) # Production Output
+                NX_small, (start = 0.0001); NY_small, (start = 0.0001) # Labor Demands
+                LX_small, (start = 0.0001); LY_small, (start = 0.0001) # Land Demands
+                KX_small, (start = 0.0001); KY_small, (start = 0.0001) # Capital Demands
+                K_small, (start = 0.0001)        # Total Capital
             end)
         
         elseif var == "AX" && 0.8 <= val <= 0.95
             @variables(small_city, begin
                 N_small, (start = 0.0001) # Total Population
-                w, (start = 0.5)        # Wage
-                p, (start = 0.5)        # Price of Y
-                r, (start = 0.01)       # Land rent
-                x, (start = 0.5); y, (start = 0.5) # Consumption
-                X, (start = 0.0001); Y, (start = 0.0001) # Production Output
-                NX, (start = 0.0001); NY, (start = 0.0001) # Labor Demands
-                LX, (start = 0.0004); LY, (start = 0.0004) # Land Demands
-                KX, (start = 0.00001); KY, (start = 0.00001) # Capital Demands
-                K, (start = 0.00001)        # Total Capital
+                w_small, (start = 0.5)        # Wage
+                p_small, (start = 0.5)        # Price of Y
+                r_small, (start = 0.01)       # Land rent
+                x_small, (start = 0.5); y_small, (start = 0.5) # Consumption
+                X_small, (start = 0.0001); Y_small, (start = 0.0001) # Production Output
+                NX_small, (start = 0.0001); NY_small, (start = 0.0001) # Labor Demands
+                LX_small, (start = 0.0004); LY_small, (start = 0.0004) # Land Demands
+                KX_small, (start = 0.00001); KY_small, (start = 0.00001) # Capital Demands
+                K_small, (start = 0.00001)        # Total Capital
             end)
         
         elseif var == "AX" && 0.951 <= val <= 1.15
             @variables(small_city, begin
                 N_small, (start = 0.0001) # Total Population
-                w, (start = 0.7)        # Wage
-                p, (start = 0.7)        # Price of Y
-                r, (start = 0.05)       # Land rent
-                x, (start = 0.5); y, (start = 0.5) # Consumption
-                X, (start = 0.0001); Y, (start = 0.0001) # Production Output
-                NX, (start = 0.0001); NY, (start = 0.0001) # Labor Demands
-                LX, (start = 0.0004); LY, (start = 0.0004) # Land Demands
-                KX, (start = 0.0001); KY, (start = 0.0001) # Capital Demands
-                K, (start = 0.0001)        # Total Capital
+                w_small, (start = 0.7)        # Wage
+                p_small, (start = 0.7)        # Price of Y
+                r_small, (start = 0.05)       # Land rent
+                x_small, (start = 0.5); y_small, (start = 0.5) # Consumption
+                X_small, (start = 0.0001); Y_small, (start = 0.0001) # Production Output
+                NX_small, (start = 0.0001); NY_small, (start = 0.0001) # Labor Demands
+                LX_small, (start = 0.0004); LY_small, (start = 0.0004) # Land Demands
+                KX_small, (start = 0.0001); KY_small, (start = 0.0001) # Capital Demands
+                K_small, (start = 0.0001)        # Total Capital
             end)
             
         elseif var == "AX" && 1.151 <= val <= 1.19
             @variables(small_city, begin
                 N_small, (start = 0.001) # Total Population
-                w, (start = 0.8)        # Wage
-                p, (start = 1.2)        # Price of Y
-                r, (start = 0.1)       # Land rent
-                x, (start = 0.45); y, (start = 0.45) # Consumption
-                X, (start = 0.0008); Y, (start = 0.0008) # Production Output
-                NX, (start = 0.0008); NY, (start = 0.0008) # Labor Demands
-                LX, (start = 0.0005); LY, (start = 0.0005) # Land Demands
-                KX, (start = 0.0001); KY, (start = 0.0001) # Capital Demands
-                K, (start = 0.0001)        # Total Capital
+                w_small, (start = 0.8)        # Wage
+                p_small, (start = 1.2)        # Price of Y
+                r_small, (start = 0.1)       # Land rent
+                x_small, (start = 0.45); y_small, (start = 0.45) # Consumption
+                X_small, (start = 0.0008); Y_small, (start = 0.0008) # Production Output
+                NX_small, (start = 0.0008); NY_small, (start = 0.0008) # Labor Demands
+                LX_small, (start = 0.0005); LY_small, (start = 0.0005) # Land Demands
+                KX_small, (start = 0.0001); KY_small, (start = 0.0001) # Capital Demands
+                K_small, (start = 0.0001)        # Total Capital
             end)
         
         elseif var == "AX" && val == 1.2
             @variables(small_city, begin
                 N_small, (start = 0.001) # Total Population
-                w, (start = 0.8)        # Wage
-                p, (start = 1.3)        # Price of Y
-                r, (start = 0.2)       # Land rent
-                x, (start = 0.6); y, (start = 0.3) # Consumption
-                X, (start = 0.001); Y, (start = 0.001) # Production Output
-                NX, (start = 0.0008); NY, (start = 0.0008) # Labor Demands
-                LX, (start = 0.0005); LY, (start = 0.0005) # Land Demands
-                KX, (start = 0.0001); KY, (start = 0.0001) # Capital Demands
-                K, (start = 0.0001)        # Total Capital
+                w_small, (start = 0.8)        # Wage
+                p_small, (start = 1.3)        # Price of Y
+                r_small, (start = 0.2)       # Land rent
+                x_small, (start = 0.6); y_small, (start = 0.3) # Consumption
+                X_small, (start = 0.001); Y_small, (start = 0.001) # Production Output
+                NX_small, (start = 0.0008); NY_small, (start = 0.0008) # Labor Demands
+                LX_small, (start = 0.0005); LY_small, (start = 0.0005) # Land Demands
+                KX_small, (start = 0.0001); KY_small, (start = 0.0001) # Capital Demands
+                K_small, (start = 0.0001)        # Total Capital
             end)
         
         elseif var == "AY" && 0.8 <= val <= 0.92
             @variables(small_city, begin
                 N_small, (start = 0.0001) # Total Population
-                w, (start = 0.7)        # Wage
-                p, (start = 0.7)        # Price of Y
-                r, (start = 0.005)       # Land rent
-                x, (start = 0.55); y, (start = 0.55) # Consumption
-                X, (start = 0.0001); Y, (start = 0.0001) # Production Output
-                NX, (start = 0.0001); NY, (start = 0.0001) # Labor Demands
-                LX, (start = 0.0004); LY, (start = 0.0004) # Land Demands
-                KX, (start = 0.00001); KY, (start = 0.00001) # Capital Demands
-                K, (start = 0.00001)        # Total Capital
+                w_small, (start = 0.7)        # Wage
+                p_small, (start = 0.7)        # Price of Y
+                r_small, (start = 0.005)       # Land rent
+                x_small, (start = 0.55); y_small, (start = 0.55) # Consumption
+                X_small, (start = 0.0001); Y_small, (start = 0.0001) # Production Output
+                NX_small, (start = 0.0001); NY_small, (start = 0.0001) # Labor Demands
+                LX_small, (start = 0.0004); LY_small, (start = 0.0004) # Land Demands
+                KX_small, (start = 0.00001); KY_small, (start = 0.00001) # Capital Demands
+                K_small, (start = 0.00001)        # Total Capital
             end)
         
         elseif var == "AY" && 0.921 <= val <= 1.03
             @variables(small_city, begin
                 N_small, (start = 0.0006) # Total Population
-                w, (start = 0.6)        # Wage
-                p, (start = 0.8)        # Price of Y
-                r, (start = 0.05)       # Land rent
-                x, (start = 0.45); y, (start = 0.45) # Consumption
-                X, (start = 0.0003); Y, (start = 0.0003) # Production Output
-                NX, (start = 0.0003); NY, (start = 0.0003) # Labor Demands
-                LX, (start = 0.0004); LY, (start = 0.0004) # Land Demands
-                KX, (start = 0.0001); KY, (start = 0.00001) # Capital Demands
-                K, (start = 0.0001)        # Total Capital
+                w_small, (start = 0.6)        # Wage
+                p_small, (start = 0.8)        # Price of Y
+                r_small, (start = 0.05)       # Land rent
+                x_small, (start = 0.45); y_small, (start = 0.45) # Consumption
+                X_small, (start = 0.0003); Y_small, (start = 0.0003) # Production Output
+                NX_small, (start = 0.0003); NY_small, (start = 0.0003) # Labor Demands
+                LX_small, (start = 0.0004); LY_small, (start = 0.0004) # Land Demands
+                KX_small, (start = 0.0001); KY_small, (start = 0.00001) # Capital Demands
+                K_small, (start = 0.0001)        # Total Capital
             end)
         else 
             @variables(small_city, begin
                 N_small, (start = 0.0001) # Total Population
-                w, (start = 0.6)        # Wage
-                p, (start = 0.8)        # Price of Y
-                r, (start = 0.05)       # Land rent
-                x, (start = 0.45); y, (start = 0.45) # Consumption
-                X, (start = 0.0003); Y, (start = 0.0003) # Production Output
-                NX, (start = 0.0003); NY, (start = 0.0003) # Labor Demands
-                LX, (start = 0.0004); LY, (start = 0.0004) # Land Demands
-                KX, (start = 0.0001); KY, (start = 0.0001) # Capital Demands
-                K, (start = 0.0001)        # Total Capital
+                w_small, (start = 0.6)        # Wage
+                p_small, (start = 0.8)        # Price of Y
+                r_small, (start = 0.05)       # Land rent
+                x_small, (start = 0.45); y_small, (start = 0.45) # Consumption
+                X_small, (start = 0.0003); Y_small, (start = 0.0003) # Production Output
+                NX_small, (start = 0.0003); NY_small, (start = 0.0003) # Labor Demands
+                LX_small, (start = 0.0004); LY_small, (start = 0.0004) # Land Demands
+                KX_small, (start = 0.0001); KY_small, (start = 0.0001) # Capital Demands
+                K_small, (start = 0.0001)        # Total Capital
             end)
         end
 
         # CES Expressions for small city
         # Unit Cost Functions
-        @NLexpression(small_city, cost_X, (γL_val^σ_X * r^(1-σ_X) + γN_val^σ_X * w^(1-σ_X) + (1-γL_val-γN_val)^σ_X * i_bar^(1-σ_X))^(1/(1-σ_X)))
-        @NLexpression(small_city, cost_Y, (ρL_val^σ_Y * r^(1-σ_Y) + ρN_val^σ_Y * w^(1-σ_Y) + (1-ρL_val-ρN_val)^σ_Y * i_bar^(1-σ_Y))^(1/(1-σ_Y)))
+        @NLexpression(small_city, cost_X_small, (γL_val^σ_X * r_small^(1-σ_X) + γN_val^σ_X * w_small^(1-σ_X) + (1-γL_val-γN_val)^σ_X * i_bar^(1-σ_X))^(1/(1-σ_X)))
+        @NLexpression(small_city, cost_Y_small, (ρL_val^σ_Y * r_small^(1-σ_Y) + ρN_val^σ_Y * w_small^(1-σ_Y) + (1-ρL_val-ρN_val)^σ_Y * i_bar^(1-σ_Y))^(1/(1-σ_Y)))
     
         # Expenditure Function
-        @NLexpression(small_city, exp_func, (u_val / Q) * (η_val^σ_D + ( (1-η_val)^σ_D * p^(1-σ_D) ) )^(1/(1-σ_D)))
+        @NLexpression(small_city, exp_func_small, (u_val / Q_small) * (η_val^σ_D + ( (1-η_val)^σ_D * p_small^(1-σ_D) ) )^(1/(1-σ_D)))
 
         # Small city constraints
         # Equilibrium Prices
-        @NLconstraint(small_city, cost_X / AX == 1.0) 
-        @NLconstraint(small_city, cost_Y == p * AY)
+        @NLconstraint(small_city, cost_X_small / AX_small == 1.0) 
+        @NLconstraint(small_city, cost_Y_small == p_small * AY_small)
     
         # Consumption Demands
-        @NLconstraint(small_city, exp_func == (1-τ)*(w + R_val + I_val) + T_val)
-        @NLconstraint(small_city, y == (u_val/Q) * ((exp_func*Q)/(u_val*p))^σ_D * (1-η_val)^σ_D)
-        @NLconstraint(small_city, x == (u_val/Q) * ((exp_func*Q)/(u_val*1.0))^σ_D * η_val^σ_D)
+        @NLconstraint(small_city, exp_func_small == (1-τ)*(w_small + R_val + I_val) + T_val)
+        @NLconstraint(small_city, y_small == (u_val/Q_small) * ((exp_func_small*Q_small)/(u_val*p_small))^σ_D * (1-η_val)^σ_D)
+        @NLconstraint(small_city, x_small == (u_val/Q_small) * ((exp_func_small*Q_small)/(u_val*1.0))^σ_D * η_val^σ_D)
     
         # Factor Demands
-        @NLconstraint(small_city, NX == ( X / AX ) * ( cost_X / w )^σ_X * γN_val^σ_X)
-        @NLconstraint(small_city, LX == ( X / AX ) * ( cost_X / r )^σ_X * γL_val^σ_X)
-        @NLconstraint(small_city, KX == ( X / AX ) * ( cost_X / i_bar )^σ_X * (1-γL_val-γN_val)^σ_X)
-        @NLconstraint(small_city, NY == ( Y / AY ) * ( cost_Y / w )^σ_Y * ρN_val^σ_Y)
-        @NLconstraint(small_city, LY == ( Y / AY ) * ( cost_Y / r )^σ_Y * ρL_val^σ_Y)
-        @NLconstraint(small_city, KY == ( Y / AY ) * ( cost_Y / i_bar )^σ_Y * (1-ρL_val-ρN_val)^σ_Y)
+        @NLconstraint(small_city, NX_small == ( X_small / AX_small ) * ( cost_X_small / w_small )^σ_X * γN_val^σ_X)
+        @NLconstraint(small_city, LX_small == ( X_small / AX_small ) * ( cost_X_small / r_small )^σ_X * γL_val^σ_X)
+        @NLconstraint(small_city, KX_small == ( X_small / AX_small ) * ( cost_X_small / i_bar )^σ_X * (1-γL_val-γN_val)^σ_X)
+        @NLconstraint(small_city, NY_small == ( Y_small / AY_small ) * ( cost_Y_small / w_small )^σ_Y * ρN_val^σ_Y)
+        @NLconstraint(small_city, LY_small == ( Y_small / AY_small ) * ( cost_Y_small / r_small )^σ_Y * ρL_val^σ_Y)
+        @NLconstraint(small_city, KY_small == ( Y_small / AY_small ) * ( cost_Y_small / i_bar )^σ_Y * (1-ρL_val-ρN_val)^σ_Y)
     
         # Resource Constraints & Market Clearing
-        @NLconstraint(small_city, N_small == NX + NY)
-        @NLconstraint(small_city, L_small == LX + LY) # L_large fixed at 1000 for Large City
-        @NLconstraint(small_city, K == KX + KY)
-        @NLconstraint(small_city, Y == N_small*y)
+        @NLconstraint(small_city, N_small == NX_small + NY_small)
+        @NLconstraint(small_city, L_small == LX_small + LY_small) # L_large fixed at 1000 for Large City
+        @NLconstraint(small_city, K_small == KX_small + KY_small)
+        @NLconstraint(small_city, Y_small == N_small*y_small)
     
         optimize!(small_city)
-        status = termination_status(small_city)
+        stat_small = termination_status(small_city)
     
         if var == "Q"
-            push!( results, (Q=val, N=value(N_small), solved=status ) )
+            push!( results, (Q=val, N=value(N_small), solved=stat_small ) )
         elseif var == "AX"
-            push!( results, (AX=val, N=value(N_small), solved=status ) )
+            push!( results, (AX=val, N=value(N_small), solved=stat_small ) )
         else
-            push!( results, (AY=val, N=value(N_small), solved=status ) )
+            push!( results, (AY=val, N=value(N_small), solved=stat_small ) )
         end
 
     end
