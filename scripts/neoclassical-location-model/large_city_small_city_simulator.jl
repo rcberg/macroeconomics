@@ -27,6 +27,7 @@ const target_ϕN = 0.617
 
 # 2. Initialize large city model
 
+# Using `Ipopt` solver, but others (e.g., KNITRO) could be used if you're licensed.
 large_city = Model(Ipopt.Optimizer)
 #set_optimizer_attribute(large_city, "print_level", 0) # Un-comment to silence output
 
@@ -107,6 +108,9 @@ Q = 1.0
 
 # 6. Calibrating the large city model
 # Objective: Minimize distance to Table 1 targets
+
+# Uses the square of the sum of the percentage difference
+# (Using just the square differences was failing to match the λs. 
 @NLobjective(large_city, Min, 
     ( ((p * y) / (x + p * y) - target_sy)/target_sy )^2 +
     ( ((w * NX) / (1.0 * X) - target_θN)/target_θN )^2 +
@@ -149,8 +153,8 @@ for var in ["Q", "AX", "AY"]
         small_city = Model(Ipopt.Optimizer)
         set_optimizer_attribute(small_city, "print_level", 0)
 
-        # we have to put _small after a lot of these or julia throws us a lot of scope warnings
-        # they don't affect anything in this script, but are annoying, and could concievably be an issue if used in a bigger project
+        # We have to put _small after a lot of these, or Julia throws us a lot of scope warnings.
+        # They don't affect anything in this script, but are annoying, and could concievably be an issue if used in a bigger project.
         if var == "Q"
             AX_small = 1.0
             AY_small = 1.0
@@ -338,7 +342,8 @@ for var in ["Q", "AX", "AY"]
         @NLconstraint(small_city, L_small == LX_small + LY_small) # L_large fixed at 1000 for Large City
         @NLconstraint(small_city, K_small == KX_small + KY_small)
         @NLconstraint(small_city, Y_small == N_small*y_small)
-    
+
+        # No need to optimize over an objective because we are supplying all the parameters now.
         optimize!(small_city)
         stat_small = termination_status(small_city)
     
