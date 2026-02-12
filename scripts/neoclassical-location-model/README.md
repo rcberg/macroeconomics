@@ -6,7 +6,7 @@ The Neoclassical Model of Location, as set up by Albouy and Stuart ([doi](https:
 
 - An example of using this model for some comparative statics, showing the differences between tax regimes, can be found [here.](https://github.com/rcberg/macroeconomics/blob/main/scripts/neoclassical-location-model/large_city_small_city_tax_comparisons.jl) The workhorse script for this part is a version of the above script which has been modified to accept user-defined parameters; find that [here.](https://github.com/rcberg/macroeconomics/blob/main/scripts/neoclassical-location-model/large_city_small_city_simulator_taxsim.jl)
 
-[![Three plots showing the tax regime comparative statics with respect to the quality of life and output sector productivities.](https://github.com/rcberg/macroeconomics/blob/main/reports/plots/as_small_city_tax_comp_plot.png?raw=true)]
+![Three plots showing the tax regime comparative statics with respect to the quality of life and output sector productivities.](https://github.com/rcberg/macroeconomics/blob/main/reports/plots/as_small_city_tax_comp_plot.png)
 
 ## To-do list:
 
