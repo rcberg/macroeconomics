@@ -4,6 +4,8 @@ The Neoclassical Model of Location, as set up by Albouy and Stuart ([doi](https:
 
 -   [This script](https://github.com/rcberg/macroeconomics/blob/main/scripts/neoclassical-location-model/large_city_small_city_simulator.jl) uses JuMP to set up the nonlinear system from Appendix B and C from the paper. Following the 'MPEC' method, the equilibrium conditions are expressed as constraints. For the large city baseline, the 'Ipopt' solver optimizes a loss function (the sum of the squared percentage difference from the target) of the CES parameters to match Table 1 targets for shares, subject to the equilibrium constraints. The important large city values are supplied for the small city, whose population and local prices are endogeneously determined. This project benefited from [Gemini 3 Pro](https://gemini.google.com/) to help better understanding aspects of the Julia language (and JuMP library).
 
+- An example of using this model for some comparative statics, showing the differences between tax regimes, can be found [here.](https://github.com/rcberg/macroeconomics/blob/main/scripts/neoclassical-location-model/large_city_small_city_tax_comparisons.jl) The workhorse script for this part is a version of the above script which has been modified to accept user-defined parameters; find that [here.](https://github.com/rcberg/macroeconomics/blob/main/scripts/neoclassical-location-model/large_city_small_city_simulator_taxsim.jl) is
+
 ## To-do list:
 
-(Nothing as of now.)
+Nothing as of now. I think the solver is very sensitive to the functional form of the MPEC constraints, so using Julia's autodiff libraries might not work for this application.
