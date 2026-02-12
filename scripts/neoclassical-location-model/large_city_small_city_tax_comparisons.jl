@@ -77,7 +77,9 @@ comp_plot_ax = plot!(ax_compare[:,1],ax_compare[:,3], label = "Tax")
 plot(ay_compare[:,1], ay_compare[:,2], title = "Home productivity", label = "Baseline")
 comp_plot_ay = plot!(ay_compare[:,1],ay_compare[:,3], label = "Tax")
 
-dw, dh = default(:size).*1.5
+dw, dh = default(:size)
+# Bigger version; example
+#dw, dh = default(:size).*1.5
 using Plots.Measures
 small_city_comp_plot = plot(comp_plot_q, comp_plot_ax, comp_plot_ay, layout = (3,1), size = (dw, dh * 3), leftmargin = 10mm)
 small_city_comp_plot
