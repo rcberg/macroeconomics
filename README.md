@@ -1,8 +1,12 @@
 # Macroeconomics
 This repository was initiated to store models and code for macroeconomic modeling, data, and analysis.
 
-## Neoclassical Model of Location
-[Check out](https://github.com/rcberg/macroeconomics/tree/main/scripts/neoclassical-location-model) this cool, in-progress project where I am building the full, nonlinear general equilibrium model from [Albouy and Stuart (2020)](https://doi.org/10.1111/iere.12419). 
+## General equilibrium model
+I have set-up a static general equilibrium model with 1 household, 2 goods/firms, and 3 factors of production featuring 1 with a fixed supply and 1 with a fixed price. Households optimize over consumption **and** their labor supply. I will likely do a write-up with it soon. (Currently struggles with *asymmetric* scaling of the fixed-supply factor and labor, but that's in progress.)
+
+Code: [Click here](https://github.com/rcberg/macroeconomics/blob/master/scripts/general_equilibrium_function_1hh2good3fct.jl)
+
+To see a demonstration of the symmetric scaling-up of two factors, be sure to check out [this code](https://github.com/rcberg/macroeconomics/blob/master/scripts/general_equilibrium_function_1hh2good3fct_stress_test.jl) as well.
 
 ## Mosquito problem solution
 A worked-through answer to an old macroeconomics preliminary exam question: [Click here](https://raw.githack.com/rcberg/macroeconomics/master/reports/mosquito-problem/mosquito_macro_problem.html)
