@@ -1,8 +1,8 @@
 # Macroeconomics
 This repository was initiated to store models and code for macroeconomic modeling, data, and analysis.
 
-## General equilibrium model
-I have set-up a static general equilibrium model with 1 household, 2 goods/firms, and 3 factors of production featuring 1 with a fixed supply and 1 with a fixed price. Households optimize over consumption **and** their labor supply. I will likely do a write-up with it soon. (Currently struggles with *asymmetric* scaling of the fixed-supply factor and labor, but that's in progress.)
+## General equilibrium julia model
+Using julia, I have implemented a full static general equilibrium model with 1 household, 2 goods/firms, and 3 factors of production featuring 1 with a fixed supply and 1 with a fixed price. Households optimize over consumption **and** their labor supply. I will likely do a write-up with it soon. (Currently struggles with *asymmetric* scaling of the fixed-supply factor and labor, but that's in progress.)
 
 Code: [Click here](https://github.com/rcberg/macroeconomics/blob/master/scripts/general_equilibrium_function_1hh2good3fct.jl)
 
