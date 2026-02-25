@@ -1,12 +1,12 @@
 # Macroeconomics
 This repository was initiated to store models and code for macroeconomic modeling, data, and analysis.
 
-## General equilibrium julia model
-Using julia, I have implemented a full static general equilibrium model with 1 household, 2 goods/firms, and 3 factors of production featuring 1 with a fixed supply and 1 with a fixed price. Households optimize over consumption **and** their labor supply. I will likely do a write-up with it soon. (Currently struggles with *asymmetric* scaling of the fixed-supply factor and labor, but that's in progress.)
+## General equilibrium Julia model
+Using Julia, I've implemented a static general equilibrium model with 1 household agent, 2 goods/firms, and 3 factors of production. Households optimize over consumption of the two goods, as well as labor supply. One of the factors ("**L**and") has a fixed supply; labor has a fixed cap with households and firms "negotiating" the final market supply; capital has a fixed rental price. I would like do a more detailed write-up of this model soon.
 
-Code: [Click here](https://github.com/rcberg/macroeconomics/blob/master/scripts/general_equilibrium_function_1hh2good3fct.jl)
+[Click here](https://github.com/rcberg/macroeconomics/blob/master/scripts/general_equilibrium_function_1hh2good3fct.jl) for the primary workhorse function, which takes as inputs 1 vector of model parameters and 1 vector with the initial "guess." The output is 1 vector of first-order condition residuals (should be very close to 0); 1 solution vector; and a 0-1 indicating if the solver converged.
 
-To see a demonstration of the symmetric scaling-up of two factors, be sure to check out [this code](https://github.com/rcberg/macroeconomics/blob/master/scripts/general_equilibrium_function_1hh2good3fct_stress_test.jl) as well.
+[Click here](https://github.com/rcberg/macroeconomics/blob/master/scripts/general_equilibrium_function_1hh2good3fct_stress_test.jl) to check out a demonstration of the function. It has a for-loop which scales-up the fixed land $L$ and maximum labor supply $N_T$ from 1 to 100, and another for-loop which holds either $L$ or $N_T$ at 100, and scales-back the other down to 1. Note: Right now, as the loop scale approaches $\approx \frac{1}{10}^{th}$ of the scale max (100), the solutions start becoming numerically unstable. 
 
 ## Mosquito problem solution
 A worked-through answer to an old macroeconomics preliminary exam question: [Click here](https://raw.githack.com/rcberg/macroeconomics/master/reports/mosquito-problem/mosquito_macro_problem.html)
