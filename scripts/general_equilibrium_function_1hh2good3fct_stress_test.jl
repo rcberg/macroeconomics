@@ -217,16 +217,22 @@ else
     domain = copy(idx_success)
 end
 
-Plots.plot(solution_matrix[:,domain]', xticks = (1:12:length(scale_success),scale_success[1:12:end]), xlabel = "Scale "*scaledown_choice*" value", ylabel = "Solution value", label = var_labs)
+Plots.plot(solution_matrix[:,domain]', xticks = (1:12:length(domain),scale_success[1:12:length(domain)]), xlabel = "Scale "*scaledown_choice*" value", ylabel = "Solution value", label = var_labs)
 # can check that prices obey homogeneity of degree one
-Plots.plot(solution_matrix[3:5,domain]', xticks = (1:12:length(scale_success),scale_success[1:12:end]), xlabel = "Scale "*scaledown_choice*" value", ylabel = "Solution value", label = [var_labs[3] var_labs[4] var_labs[5]])
+Plots.plot(solution_matrix[3:5,domain]', xticks = (1:12:length(domain),scale_success[1:12:length(domain)]), xlabel = "Scale "*scaledown_choice*" value", ylabel = "Solution value", label = [var_labs[3] var_labs[4] var_labs[5]])
 
 # look at the FOC residuals. kind of interesting patterns.
-Plots.plot(convergence_matrix[:,domain]', xticks = (1:12:length(scale_success),scale_success[1:12:end]), xlabel = "Scale "*scaledown_choice*" value", ylabel="FOC error", label = var_labs)
+Plots.plot(convergence_matrix[:,domain]', xticks = (1:12:length(domain),scale_success[1:12:length(domain)]), xlabel = "Scale "*scaledown_choice*" value", ylabel="FOC error", label = var_labs)
 
-# i added this part for ease of plotting and inspecting the individual solutions and FOC residuals 
-# copy/paste `j = ...` into the repl and execute; do the same with either the `solution matrix` or `convergence matrix` plot codes.
-# now you can use up/down arrows to change j, plot the result, and repeat-- fast.
-j = 1
-Plots.plot(solution_matrix[j,domain], xlabel = "Scale "*scaledown_choice*" value", ylabel = "Solution value", xticks = (1:12:length(scale_success),scale_success[1:12:end]), label = var_labs[j])
-Plots.plot(convergence_matrix[j,domain], xlabel = "Scale "*scaledown_choice*" value", ylabel = "FOC error", xticks = (1:12:length(scale_success),scale_success[1:12:end]), label = foc_labs[j])
+# for inspecting individual solutions/FOC residuals
+for j in 1:(size(solution_matrix)[1])
+    p = Plots.plot(solution_matrix[j,domain], xlabel = "Scale "*scaledown_choice*" value", ylabel = "Solution value", xticks = (1:12:length(domain),scale_success[1:12:length(domain)]), label = var_labs[j],dpi = 300)
+    display(p) # required to show plot inside a loop
+    sleep(0.5)
+end
+
+for j in 1:(size(solution_matrix)[1])
+    p = Plots.plot(convergence_matrix[j,domain], xlabel = "Scale "*scaledown_choice*" value", ylabel = "FOC error", xticks = (1:12:length(domain),scale_success[1:12:length(domain)]), label = foc_labs[j])
+    display(p)
+    sleep(0.5)
+end
