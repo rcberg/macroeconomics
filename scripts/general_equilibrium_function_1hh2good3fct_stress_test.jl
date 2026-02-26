@@ -109,7 +109,7 @@ for j in 1:(size(symm_solution_matrix)[1])
             xlabel = "Scale value", 
             ylabel = "Solution value", 
             xticks = (1:12:scale_max,1:12:scale_max), 
-            label = foc_labs[j])
+            label = var_labs[j])
     display(p)
     sleep(0.5)
 end
