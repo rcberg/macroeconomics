@@ -1,12 +1,14 @@
 # Macroeconomics
 This repository was initiated to store models and code for macroeconomic modeling, data, and analysis.
 
-## General equilibrium Julia model
-Using Julia, I've implemented a static general equilibrium model with 1 household agent, 2 goods/firms, and 3 factors of production. Households optimize over consumption of the two goods, as well as labor supply. One of the factors ("**L**and") has a fixed supply; labor has a fixed cap with households and firms "negotiating" the final market supply; capital has a fixed rental price. I would like do a more detailed write-up of this model soon.
+## General equilibrium Julia models
+I've implemented a couple static general equilibrium models in Julia which have 2 goods/firms and 3 factors of production. One of the models has a single household, another has a 2-household setup. Households optimize over consumption of the two goods, and in the 2-household case, one of the households optimizes over labor supply as well. "**L**and" is a fixed factor; labor is constrained by the fixed "hours in the day," but otherwise households and firms negotiate the final market supply within that; capital has a fixed rental price.
 
-[Click here](https://github.com/rcberg/macroeconomics/blob/master/scripts/general_equilibrium_function_1hh2good3fct.jl) for the primary workhorse function, which takes as inputs 1 vector of model parameters and 1 vector with the initial "guess." The output is 1 vector of first-order condition residuals (should be very close to 0); 1 solution vector; and a 0-1 indicating if the solver converged.
+[Click here](https://github.com/rcberg/macroeconomics/blob/main/reports/general-eqm-1x2x3-writeup/general-equilibrium-1x2x3-writeup.ipynb) to check out the 1 household-2 good-3 factor model. In this version, the representative household owns all factors *and* supplies all the labor.
 
-[Click here](https://github.com/rcberg/macroeconomics/blob/master/scripts/general_equilibrium_function_1hh2good3fct_stress_test.jl) to check out a demonstration of the function. It has a for-loop which scales-up the fixed land $L$ and maximum labor supply $N_T$ from 1 to 100, and another for-loop which holds either $L$ or $N_T$ at 100, and scales-back the other down to 1. Note: Right now, as the loop scale approaches $\approx \frac{1}{10}^{th}$ of the scale max (100), the solutions start becoming numerically unstable. 
+[Click here](https://github.com/rcberg/macroeconomics/blob/main/reports/general-eqm-2x2x3-writeup/general-equilibrium-2x2x3-writeup.ipynb) to see the version extended with a second household who does not participate in the labor force, but gets all their income from being the sole owner of the non-labor factors.
+
+To see the actual functions which do the heavy-lifting, [here is the 1-household version](https://github.com/rcberg/macroeconomics/blob/main/scripts/general_equilibrium_function_1hh2good3fct.jl) and [here is the 2-household version](https://github.com/rcberg/macroeconomics/blob/main/scripts/general_equilibrium_function_2hh2good3fct.jl).
 
 ## Mosquito problem solution
 A worked-through answer to an old macroeconomics preliminary exam question: [Click here](https://raw.githack.com/rcberg/macroeconomics/master/reports/mosquito-problem/mosquito_macro_problem.html)
