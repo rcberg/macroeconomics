@@ -2,6 +2,12 @@
 This repository was initiated to store models and code for macroeconomic modeling, data, and analysis.
 
 ## General equilibrium Julia models
+I have produced a few general equilibrium models using Julia, to promote general mental health and welfare.
+
+### Albouy and Stuart (2020) Replication Model
+[Click here](https://github.com/rcberg/macroeconomics/tree/main/scripts/neoclassical-location-model) to check out the nonlinear urban equilibrium model that replicates the Albouy and Stuart (2020) "Neoclassical Model of Location." These require functional forms for the cost and expenditure functions (default to the CES case) as well as parameter targets for calibration. Other than that, the user needs to do no math-- the model will build all the necessary cost/expenditure functions, their gradients, and Jacobian matrices which get fed to the optimization algorithm to produce solutions to the model.
+
+### General 2 good/2 firm/3 factor general equilibrium model
 I've implemented a couple static general equilibrium models in Julia which have 2 goods/firms and 3 factors of production. One of the models has a single household, another has a 2-household setup. Households optimize over consumption of the two goods, and in the 2-household case, one of the households optimizes over labor supply as well. "**L**and" is a fixed factor; labor is constrained by the fixed "hours in the day," but otherwise households and firms negotiate the final market supply within that; capital has a fixed rental price.
 
 [Click here](https://github.com/rcberg/macroeconomics/blob/main/reports/general-eqm-1x2x3-writeup/general-equilibrium-1x2x3-writeup.ipynb) to check out the 1 household-2 good-3 factor model. In this version, the representative household owns all factors *and* supplies all the labor.
