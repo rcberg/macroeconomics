@@ -18,7 +18,8 @@ model_lg = build_model(fns;
 
 # solve the model output and acquire the solutions
 optimize!(model_lg)
-solution_mat = [all_variables(model_lg) value.(all_variables(model_lg))]
+
+solution_mat_lg = [all_variables(model_lg) value.(all_variables(model_lg))]
 solution_lg = NamedTuple{Tuple(Symbol.(name.(all_variables(model_lg))))}(value.(all_variables(model_lg)))
 @show termination_status(model_lg)
 @show objective_value(model_lg)
@@ -41,8 +42,8 @@ model_sm = build_model(fns;
 )
 
 optimize!(model_sm)
-vals = value.(all_variables(model_sm))
-solution_sm_mat = [all_variables(model_sm) vals]
+
+solution_mat_sm = [all_variables(model_sm) value.(all_variables(model_sm))]
 solution_sm = NamedTuple{Tuple(Symbol.(name.(all_variables(model_lg))))}(value.(all_variables(model_lg)))
 @show termination_status(model_sm)
 @show objective_value(model_sm)

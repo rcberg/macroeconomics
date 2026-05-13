@@ -3,26 +3,26 @@ using Ipopt
 using Plots
 
 # 1. Model constants/calibration targets
-const σ_D = 0.667
-const σ_X = 0.667
-const σ_Y = 0.667
-const α = (σ_D - 1) / σ_D
-const β = (σ_X - 1) / σ_X
-const χ = (σ_Y - 1) / σ_Y
-const i_bar = 1.0
-const L_large = 1000.0
-const L_small = L_large*1e-6
-const N_large = 1000.0
-const τ = 0.0
-const λ_L = 0.17
-const λ_N = 0.7
+σ_D = 0.667
+σ_X = 0.667
+σ_Y = 0.667
+α = (σ_D - 1) / σ_D
+β = (σ_X - 1) / σ_X
+χ = (σ_Y - 1) / σ_Y
+i_bar = 1.0
+L_large = 1000.0
+L_small = L_large*1e-6
+N_large = 1000.0
+τ = 0.0
+λ_L = 0.17
+λ_N = 0.7
 
 # Targets from Albouy and Stuart's Table 1
-const target_sy = 0.36
-const target_θL = 0.025 
-const target_θN = 0.825
-const target_ϕL = 0.233
-const target_ϕN = 0.617
+target_sy = 0.36
+target_θL = 0.025 
+target_θN = 0.825
+target_ϕL = 0.233
+target_ϕN = 0.617
 
 
 # 2. Initialize large city model

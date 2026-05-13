@@ -5,7 +5,7 @@ function build_model(fns;
     u_bar = nothing, N_fixed = nothing, 
     ηx_fixed = nothing, γL_fixed = nothing, γN_fixed = nothing, ρL_fixed = nothing, ρN_fixed = nothing,
     τ, ι_bar,
-     λ_L = 0.17, λ_N = 0.7)
+    λ_L = 0.17, λ_N = 0.7)
 
     ϵ = 1e-6
 
@@ -56,7 +56,8 @@ function build_model(fns;
      )
     @operator(urban_economy, op_e, 2,
     (p, η_x) -> fns.exp_fun([p, η_x]),
-    (g, p, η_x) -> fns.dexp_fun_ip!(g,[ p, η_x]) )
+    (g, p, η_x) -> fns.dexp_fun_ip!(g,[ p, η_x]) 
+    )
     @operator(urban_economy, op_∂e_∂p, 2,
     (p, η_x) -> fns.dexp_dp_fn([p, η_x]),
     (g, p, η_x) -> fns.d2exp_dp_ip!(g, [p, η_x]) )
@@ -135,12 +136,12 @@ function build_model(fns;
     @constraint(urban_economy, op_∂e_∂p(p, η_x) * u_bar_v / Q == y )
     
     # factor demands (3a*-3f*)
-    @constraint(urban_economy, op_∂cX_∂w(r, w, γ_L, γ_N) == A_X * NX / X  )
-    @constraint(urban_economy, op_∂cX_∂r(r, w, γ_L, γ_N) == A_X * LX / X  )
-    @constraint(urban_economy, op_∂cX_∂i(r, w, γ_L, γ_N) == A_X * KX / X  )
-    @constraint(urban_economy, op_∂cY_∂w(r, w, ρ_L, ρ_N) == A_Y * NY / Y  )
-    @constraint(urban_economy, op_∂cY_∂r(r, w, ρ_L, ρ_N) == A_Y * LY / Y  )
-    @constraint(urban_economy, op_∂cY_∂i(r, w, ρ_L, ρ_N) == A_Y * KY / Y  )
+    @constraint(urban_economy, op_∂cX_∂w(r, w, γ_L, γ_N) * (X / A_X) == NX )
+    @constraint(urban_economy, op_∂cX_∂r(r, w, γ_L, γ_N) * (X / A_X) == LX )
+    @constraint(urban_economy, op_∂cX_∂i(r, w, γ_L, γ_N) * (X / A_X) == KX )
+    @constraint(urban_economy, op_∂cY_∂w(r, w, ρ_L, ρ_N) * (Y / A_Y) == NY )
+    @constraint(urban_economy, op_∂cY_∂r(r, w, ρ_L, ρ_N) * (Y / A_Y) == LY )
+    @constraint(urban_economy, op_∂cY_∂i(r, w, ρ_L, ρ_N) * (Y / A_Y) == KY )
     
     # resource constraints & market clearing (4a*-4c*, 6*)
     @constraint(urban_economy, N_total == NX + NY)
