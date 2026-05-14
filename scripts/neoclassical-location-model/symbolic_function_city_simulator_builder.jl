@@ -4,6 +4,7 @@ function build_model(fns;
     Q, A_X, A_Y, L_0, 
     u_bar = nothing, N_fixed = nothing, 
     ηx_fixed = nothing, γL_fixed = nothing, γN_fixed = nothing, ρL_fixed = nothing, ρN_fixed = nothing,
+    R_fixed = nothing, I_fixed = nothing, T_fixed = nothing,
     τ, ι_bar,
     λ_L = 0.17, λ_N = 0.7)
 
@@ -80,13 +81,17 @@ function build_model(fns;
         @variable(urban_economy, 0.0 <= γ_N <= 1.0, start = 0.9284 )
         @variable(urban_economy, 0.0 <= ρ_L <= 1.0, start = 0.3668 )
         @variable(urban_economy, 0.0 <= ρ_N <= 1.0, start = 0.5773 )
-
+        @variable(urban_economy, R >= ϵ, start = 0.1)
+        @variable(urban_economy, I >= ϵ, start = 0.1)
+        @variable(urban_economy, T >= 0.0, start = 0.1) # needs to be 0.0 to accommodate τ = 0 option
+    
         @constraint(urban_economy, γ_L + γ_N <= 1.0 )
         @constraint(urban_economy, ρ_L + ρ_N <= 1.0 )
 
     else
-        if any(isnothing, (ηx_fixed, γL_fixed, γN_fixed, ρL_fixed, ρN_fixed))
-            error("Small city requires calibrated share parameters")
+        if any(isnothing, (ηx_fixed, γL_fixed, γN_fixed, ρL_fixed, ρN_fixed,
+            R_fixed, I_fixed, T_fixed))
+            error("Small city requires calibrated share parameters and income/transfers")
         end
 
         L_total = L_0*1e-6
@@ -99,6 +104,9 @@ function build_model(fns;
         γ_N = γN_fixed
         ρ_L = ρL_fixed
         ρ_N = ρN_fixed
+        R = R_fixed
+        I = I_fixed
+        T = T_fixed
 
     end
 
@@ -115,14 +123,13 @@ function build_model(fns;
     @variable(urban_economy, KX >= ϵ, start = 0.5) 
     @variable(urban_economy, KY >= ϵ, start = 0.5)
     @variable(urban_economy, K >= ϵ, start = 1.0)
-    @variable(urban_economy, R >= ϵ, start = 0.1)
-    @variable(urban_economy, I >= ϵ, start = 0.1)
-    @variable(urban_economy, T >= 0.0, start = 0.1) # needs to be 0.0 to accommodate τ = 0 option
     
-    # consumer problem equilibrium equations
-    @constraint(urban_economy, R == (r*L_total) / N_total )
-    @constraint(urban_economy, I == (ι_bar*K) / N_total )
-    @constraint(urban_economy, T == τ*(w + R + I) )
+    if isnothing(u_bar)
+        # consumer problem equilibrium equations
+        @constraint(urban_economy, R == (r*L_total) / N_total )
+        @constraint(urban_economy, I == (ι_bar*K) / N_total )
+        @constraint(urban_economy, T == τ*(w + R + I) )
+    end
 
     income = (1 - τ)*(w + R + I) + T
 
