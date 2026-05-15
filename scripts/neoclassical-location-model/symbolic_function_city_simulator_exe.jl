@@ -38,6 +38,7 @@ model_sm = build_model(fns;
     Q = 1.0, A_X = 1.0, A_Y = 1.0, L_0 = 1000.0, 
     τ = 0.0, ι_bar = 1.0, 
     ηx_fixed = solution_lg.η_x, γL_fixed = solution_lg.γ_L, γN_fixed = solution_lg.γ_N, ρL_fixed = solution_lg.ρ_L, ρN_fixed = solution_lg.ρ_N,
+    R_fixed = solution_lg.R, I_fixed = solution_lg.I, T_fixed = solution_lg.T,
     u_bar = solution_lg.u_bar_v,
 )
 

@@ -8,7 +8,7 @@ function build_model(fns;
     τ, ι_bar,
     λ_L = 0.17, λ_N = 0.7)
 
-    ϵ = 1e-6
+    ϵ = 0.0
 
     # parameter targets from albouy and stuart's table 1
     target_sy = 0.36

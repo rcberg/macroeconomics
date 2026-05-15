@@ -6,7 +6,7 @@ using Plots
 # note: they're separated so you can tweak the "_func_compiler.jl" with new functions, if desired
 include("symbolic_function_city_simulator_func_compiler.jl")
 include("symbolic_function_city_simulator_builder.jl")
-
+#include("stuart_initial_val_fun.jl")
 # loads the compiled cost/expenditure functions; outputting `fns`
 fns = compile_step()
 
@@ -21,9 +21,10 @@ model_lg = build_model(fns;
 optimize!(model_lg)
 solution_lg = NamedTuple{Tuple(Symbol.(name.(all_variables(model_lg))))}(value.(all_variables(model_lg)))
 
-### Q ###
-# using "warm start"
 support = 0.81:0.01:1.2
+
+# using "warm start"
+### Q ###
 results_q = []
 
 model_sm = build_model(fns;
@@ -64,8 +65,6 @@ Plots.plot(plot_x, plot_y, label = "Q",
             ylims = (-1.5, 2), yticks = -1.5:0.5:2.0)
 
 ### AX ###
-
-# using "warm start"
 results_ax = []
 
 model_sm = build_model(fns;
@@ -107,7 +106,6 @@ Plots.plot(plot_x, plot_y, label = "AX",
             )
 
 ### AY ###
-# using "warm start"
 results_ay = []
 
 model_sm = build_model(fns;
@@ -143,29 +141,44 @@ for i in support
 end
 
 plot_x = [row.AY for row in results_ay] .- 1.0
-plot_y = ( [row.N for row in results_ay] ./ [row.N for row in results_ay][plot_x .== 0.0] .- 1.0 )./0.36
+plot_y = ( [row.N for row in results_ay] ./ [row.N for row in results_ay][plot_x .== 0.0] .- 1.0 ) ./0.36
 Plots.plot(plot_x, plot_y, label = "AY", 
             xlims = (-0.2, 0.2), xticks = -0.2:0.05:0.2,
             ylims = (-2.0, 2.0), yticks = -2.0:0.5:2.0 )
 
-###stuart initial value bank [not necessay]
-### #Q: 0.8 <= val <= 0.84
-### #[0.0001, 0.65, 0.65, 0.005, 0.55,  0.55, 0.00001,  0.00001, 0.00001,  0.00001, 0.0004,  0.0004, 0.000001,  0.000001, 0.000001]
-### #Q: 0.841 <= val <= 1.0
-### #[0.0001, 0.7, 0.7, 0.05, 0.4,  0.4, 0.0003,  0.0003, 0.0003,  0.0003, 0.0004,  0.0004, 0.00001,  0.00001, 0.00001  ]
-### #Q: 1.001 <= val <= 1.2
-### [0.001, 0.8, 0.8, 0.07, 0.4,  0.4, 0.0001,  0.0001, 0.0001,  0.0001, 0.0001,  0.0001, 0.0001,  0.0001, 0.0001  ]
-### #AX: 0.8 <= val <= 0.95
-### [0.0001, 0.5, 0.5, 0.01, 0.5,  0.5, 0.0001,  0.0001, 0.0001,  0.0001, 0.0004,  0.0004, 0.00001,  0.00001, 0.00001  ]
-### #AX: 0.951 <= val <= 1.15
-### [0.0001, 0.7, 0.7, 0.05, 0.5,  0.5, 0.0001,  0.0001, 0.0001,  0.0001, 0.0004,  0.0004, 0.0001,  0.0001, 0.0001]
-### #AX: 1.151 <= val <= 1.19
-### [0.001, 0.8, 1.2, 0.1, 0.45,  0.45, 0.0008,  0.0008, 0.0008,  0.0008, 0.0005,  0.0005, 0.0001,  0.0001, 0.0001 ] 
-### #AX: val == 1.2
-### [0.001, 0.8, 1.3, 0.2, 0.6,  0.3, 0.001,  0.001, 0.0008,  0.0008, 0.0005,  0.0005, 0.0001,  0.0001, 0.0001  ]
-### #AY: 0.8 <= val <= 0.92
-### [0.0001, 0.7, 0.7, 0.005, 0.55,  0.55, 0.0001,  0.0001, 0.0001,  0.0001, 0.0004,  0.0004, 0.00001,  0.00001, 0.00001]
-### #AY: 0.921 <= val <= 1.03
-### [0.0006, 0.6, 0.8, 0.05, 0.45,  0.45, 0.0003,  0.0003, 0.0003,  0.0003, 0.0004,  0.0004, 0.0001,  0.00001, 0.0001]
-### #AY: 1.04 <= val
-### [0.0001, 0.6, 0.8, 0.05, 0.45,  0.45, 0.0003,  0.0003, 0.0003,  0.0003, 0.0004,  0.0004, 0.0001,  0.0001, 0.0001  ]
+            # using stuart supplied initial values
+#syms = [:N_total, :w, :p, :r, :x, :y, :X, :Y, :NX, :NY, :LX, :LY, :KX, :KY, :K]
+#    
+#### Q ###
+#results_q = []
+#
+#model_sm = build_model(fns;
+#        Q = 0.8, A_X = 1.0, A_Y = 1.0, L_0 = 1000.0, 
+#        τ = 0.0, ι_bar = 1.0, 
+#        ηx_fixed = solution_lg.η_x, γL_fixed = solution_lg.γ_L, γN_fixed = solution_lg.γ_N, ρL_fixed = solution_lg.ρ_L, ρN_fixed = solution_lg.ρ_N,
+#        R_fixed = solution_lg.R, I_fixed = solution_lg.I, T_fixed = solution_lg.T,
+#        u_bar = solution_lg.u_bar_v
+#        )
+#set_optimizer_attribute(model_sm, "print_level", 0)
+#optimize!(model_sm)
+#push!(results_q, (Q = 0.8, N = value(model_sm[:N_total]), status = termination_status(model_sm)) )
+#for i in support
+#
+#    global model_sm
+#
+#    ivals = stuart_init_val_fn(syms; variable = "Q", val = i)
+#    
+#    model_sm = build_model(fns;
+#        Q = i, A_X = 1.0, A_Y = 1.0, L_0 = 1000.0, 
+#        τ = 0.0, ι_bar = 1.0, 
+#        ηx_fixed = solution_lg.η_x, γL_fixed = solution_lg.γ_L, γN_fixed = solution_lg.γ_N, ρL_fixed = solution_lg.ρ_L, ρN_fixed = solution_lg.ρ_N,
+#        R_fixed = solution_lg.R, I_fixed = solution_lg.I, T_fixed = solution_lg.T,
+#        u_bar = solution_lg.u_bar_v
+#        )
+#    set_optimizer_attribute(model_sm, "print_level", 0)
+#    set_start_value.([model_sm[i] for i in syms], ivals)
+#    optimize!(model_sm)
+#    
+#    push!(results_q, (Q = i, N = value(model_sm[:N_total]), status = termination_status(model_sm)) )
+#end
+#
